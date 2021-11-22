@@ -1,17 +1,15 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Web3ReactProvider } from '@web3-react/core'
 import App from 'components/App';
-import { getLibrary } from 'utils/web3React';
 import reportWebVitals from './reportWebVitals';
-
+import Providers from 'Providers';
 import './styles/index.scss';
 
 ReactDOM.render(
   <React.StrictMode>
-    <Web3ReactProvider getLibrary={getLibrary}>
+    <Providers>
       <App />
-    </Web3ReactProvider>
+    </Providers>
   </React.StrictMode>,
   document.getElementById('root')
 );
