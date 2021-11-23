@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Currency,
   CurrencyAmount,
+  ETHER,
   JSBI,
   Token,
   TokenAmount,
@@ -12,7 +13,7 @@ import { ParsedQs } from "qs";
 import useActiveWeb3React from "hooks/useActiveWeb3React";
 import useENS from "hooks/ENS/useENS";
 import { useDispatch, useSelector } from "react-redux";
-import { Field, replaceSwapState } from "state/swap/actions";
+import { Field, selectCurrency, replaceSwapState, switchCurrencies, typeInput, setRecipient } from "state/swap/actions";
 import { useCurrency } from "hooks/useTokens";
 import { useCurrencyBalances } from "state/wallet/hooks";
 import { AppDispatch, AppState } from "state";
@@ -278,4 +279,49 @@ export function useDefaultsFromURLSearch():
   }, [dispatch, chainId]);
 
   return result;
+}
+
+export function useSwapActionHandlers(): {
+  onCurrencySelection: (field: Field, currency: Currency) => void
+  onSwitchTokens: () => void
+  onUserInput: (field: Field, typedValue: string) => void
+  onChangeRecipient: (recipient: string | null) => void
+} {
+  const dispatch = useDispatch<AppDispatch>()
+  const onCurrencySelection = useCallback(
+    (field: Field, currency: Currency) => {
+      dispatch(
+        selectCurrency({
+          field,
+          currencyId: currency instanceof Token ? currency.address : currency === ETHER ? 'BNB' : '',
+        }),
+      )
+    },
+    [dispatch],
+  )
+
+  const onSwitchTokens = useCallback(() => {
+    dispatch(switchCurrencies())
+  }, [dispatch])
+
+  const onUserInput = useCallback(
+    (field: Field, typedValue: string) => {
+      dispatch(typeInput({ field, typedValue }))
+    },
+    [dispatch],
+  )
+
+  const onChangeRecipient = useCallback(
+    (recipient: string | null) => {
+      dispatch(setRecipient({ recipient }))
+    },
+    [dispatch],
+  )
+
+  return {
+    onSwitchTokens,
+    onCurrencySelection,
+    onUserInput,
+    onChangeRecipient,
+  }
 }

@@ -106,6 +106,7 @@ function useCallsData(calls: (Call | undefined)[], options?: ListenerOptions): C
         if (!chainId || !call) return INVALID_RESULT
 
         const result = callResults[chainId]?.[toCallKey(call)]
+        console.log(callResults)
         let data
         if (result?.data && result?.data !== '0x') {
           // eslint-disable-next-line prefer-destructuring

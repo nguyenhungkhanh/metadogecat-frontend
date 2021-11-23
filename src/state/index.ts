@@ -8,7 +8,7 @@ import multicallReducer from './multicall/reducer'
 import listsReducer from './lists/reducer'
 import swapReducer from './swap/reducer'
 
-const PERSISTED_KEYS: string[] = []
+const PERSISTED_KEYS: string[] = ['lists']
 
 const store = configureStore({
   devTools: process.env.NODE_ENV !== 'production',

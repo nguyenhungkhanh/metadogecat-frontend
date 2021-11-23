@@ -4,7 +4,7 @@ import { Token, Currency, ETHER } from "@pancakeswap/sdk";
 import { arrayify } from 'ethers/lib/utils'
 import { parseBytes32String } from '@ethersproject/strings'
 import useUserAddedTokens from "state/user/hooks/useUserAddedTokens";
-import { TokenAddressMap, useUnsupportedTokenList, useCombinedActiveList } from "state/lists/hooks";
+import { TokenAddressMap, useUnsupportedTokenList, useCombinedActiveList, useCombinedInactiveList } from "state/lists/hooks";
 import useActiveWeb3React from "hooks/useActiveWeb3React";
 import { isAddress } from 'utils'
 import { useBytes32TokenContract, useTokenContract } from 'hooks/useContract'
@@ -128,4 +128,23 @@ export function useCurrency(currencyId: string | undefined): Currency | null | u
 export function useUnsupportedTokens(): { [address: string]: Token } {
   const unsupportedTokensMap = useUnsupportedTokenList();
   return useTokensFromMap(unsupportedTokensMap, false);
+}
+
+export function useAllInactiveTokens(): { [address: string]: Token } {
+  // get inactive tokens
+  const inactiveTokensMap = useCombinedInactiveList()
+  const inactiveTokens = useTokensFromMap(inactiveTokensMap, false)
+
+  // filter out any token that are on active list
+  const activeTokensAddresses = Object.keys(useAllTokens())
+  const filteredInactive = activeTokensAddresses
+    ? Object.keys(inactiveTokens).reduce<{ [address: string]: Token }>((newMap, address) => {
+        if (!activeTokensAddresses.includes(address)) {
+          newMap[address] = inactiveTokens[address]
+        }
+        return newMap
+      }, {})
+    : inactiveTokens
+
+  return filteredInactive
 }

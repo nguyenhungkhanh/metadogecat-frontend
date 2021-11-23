@@ -1,12 +1,14 @@
 import React from 'react'
 import { useEagerConnect } from 'hooks'
 import useUserAgent from 'hooks/useUserAgent'
+import { usePollBlockNumber } from 'state/block/hooks'
 import { Router, Switch, Route } from 'react-router-dom'
 import history from 'routerHistory'
 import Home from 'pages/home'
 import Swap from 'pages/swap'
 
 export default function App() {
+  usePollBlockNumber()
   useUserAgent()
   useEagerConnect()
 

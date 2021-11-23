@@ -3,11 +3,23 @@ import ReactDOM from 'react-dom';
 import App from 'components/App';
 import reportWebVitals from './reportWebVitals';
 import Providers from 'Providers';
+import ListsUpdater from 'state/lists/updater'
+import MulticallUpdater from 'state/multicall/updater'
 import './styles/index.scss';
+
+function Updaters() {
+  return (
+    <>
+      <ListsUpdater />
+      <MulticallUpdater />
+    </>
+  )
+}
 
 ReactDOM.render(
   <React.StrictMode>
     <Providers>
+      <Updaters />
       <App />
     </Providers>
   </React.StrictMode>,

@@ -22,7 +22,7 @@ export interface UserState {
 }
 
 export const initialState: UserState = {
-  userSingleHopOnly: false,
+  userSingleHopOnly: true,
   userSlippageTolerance: INITIAL_ALLOWED_SLIPPAGE,
   gasPrice: GAS_PRICE_GWEI.default,
   tokens: {},
