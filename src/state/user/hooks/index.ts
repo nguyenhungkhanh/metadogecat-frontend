@@ -1,10 +1,10 @@
 import { useCallback } from "react"
 import { useDispatch, useSelector } from 'react-redux'
-import { updateUserSingleHopOnly } from "state/user/actions"
+import { addSerializedToken, updateUserSingleHopOnly } from "state/user/actions"
 import { AppDispatch, AppState } from 'state'
 import { updateUserSlippageTolerance } from 'state/user/actions'
-import { GAS_PRICE_GWEI } from "./helpers"
-import { ChainId } from "@pancakeswap/sdk"
+import { GAS_PRICE_GWEI, serializeToken } from "./helpers"
+import { ChainId, Token } from "@pancakeswap/sdk"
 
 export function useUserSingleHopOnly(): [boolean, (newSingleHopOnly: boolean) => void] {
   const dispatch = useDispatch<AppDispatch>()
@@ -43,4 +43,14 @@ export function useGasPrice(): string {
   const chainId = process.env.REACT_APP_CHAIN_ID
   const userGas = useSelector<AppState, AppState['user']['gasPrice']>((state) => state.user.gasPrice)
   return chainId === ChainId.MAINNET.toString() ? userGas : GAS_PRICE_GWEI.testnet
+}
+
+export function useAddUserToken(): (token: Token) => void {
+  const dispatch = useDispatch<AppDispatch>()
+  return useCallback(
+    (token: Token) => {
+      dispatch(addSerializedToken({ serializedToken: serializeToken(token) }))
+    },
+    [dispatch],
+  )
 }

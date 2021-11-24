@@ -47,7 +47,14 @@ export default function CurrencyInput({
           onChange={handleOnChange}
           placeholder="0.0"
         />
-        <div className="px-2">{ currency?.symbol || 'Select a currency' }</div>
+        <div className="flex">
+          {
+            showMaxButton
+            ? <div onClick={onMax}>MAX</div>
+            : null
+          }
+          <div className="px-2">{ currency?.symbol || 'Select a currency' }</div>
+        </div>
       </div>
       <ModalSelectCurrency />
     </div>

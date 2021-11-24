@@ -47,6 +47,8 @@ export const BETTER_TRADE_LESS_HOPS_THRESHOLD = new Percent(JSBI.BigInt(50), JSB
 
 // default allowed slippage, in bips
 export const INITIAL_ALLOWED_SLIPPAGE = 50
+// 20 minutes, denominated in seconds
+export const DEFAULT_DEADLINE_FROM_NOW = 60 * 20
 
 // one basis point
 export const ONE_BIPS = new Percent(JSBI.BigInt(1), JSBI.BigInt(10000))
@@ -57,3 +59,6 @@ export const ALLOWED_PRICE_IMPACT_MEDIUM: Percent = new Percent(JSBI.BigInt(300)
 export const ALLOWED_PRICE_IMPACT_HIGH: Percent = new Percent(JSBI.BigInt(500), BIPS_BASE) // 5%
 // for non expert mode disable swaps above this
 export const BLOCKED_PRICE_IMPACT_NON_EXPERT: Percent = new Percent(JSBI.BigInt(1500), BIPS_BASE) // 15%
+
+// used to ensure the user doesn't send so much BNB so they end up with <.01
+export const MIN_BNB: JSBI = JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(16)) // .01 BNB

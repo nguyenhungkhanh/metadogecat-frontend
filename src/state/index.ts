@@ -5,6 +5,7 @@ import { updateVersion } from './global/actions'
 import userReducer from './user/reducer'
 import blockReducer from './block/reducer'
 import multicallReducer from './multicall/reducer'
+import transactionsReducer from './transactions/reducer'
 import listsReducer from './lists/reducer'
 import swapReducer from './swap/reducer'
 
@@ -17,6 +18,7 @@ const store = configureStore({
 
     // Exchange
     multicall: multicallReducer,
+    transactions: transactionsReducer,
     user: userReducer,
     lists: listsReducer,
     swap: swapReducer,
