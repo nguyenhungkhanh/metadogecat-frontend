@@ -1,4 +1,3 @@
-import Overlay from "components/Elements/Overlay";
 import React, { createContext, useState } from "react";
 
 export type Handler = () => void;
@@ -32,7 +31,6 @@ export const ModalProvider: React.FC = ({ children }) => {
 
   const handleOverlayDismiss = () => {
     if (closeOnOverlayClick) {
-      console.log('closeOnOverlayClick')
       handleDismiss();
     }
   };
@@ -46,8 +44,8 @@ export const ModalProvider: React.FC = ({ children }) => {
       }}
     >
       {isOpen && (
-        <div className="flex items-center justify-center fixed top-0 bottom-0 left-0 right-0 w-full h-full z-10">
-          <Overlay onClick={handleOverlayDismiss} />
+        <div className="flex justify-center fixed top-0 bottom-0 left-0 right-0 w-full h-full z-10">
+          <div className="fixed top-0 bottom-0 left-0 right-0 bg-black bg-opacity-60" onClick={handleOverlayDismiss} />
           {React.isValidElement(modalNode) &&
             React.cloneElement(modalNode, {
               onDismiss: handleDismiss,

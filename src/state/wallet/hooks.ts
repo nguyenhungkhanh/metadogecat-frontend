@@ -5,6 +5,9 @@ import { useMulticallContract } from 'hooks/useContract'
 import { isAddress } from 'utils'
 import { getMulticallAddress } from 'utils/addressHelpers'
 import { useSingleContractMultipleData, useMultipleContractSingleData } from 'state/multicall/hooks'
+import { useWeb3React } from "@web3-react/core"
+import { useAllTokens } from "hooks/useTokens"
+import useActiveWeb3React from "hooks/useActiveWeb3React"
 
 /**
  * Returns a map of the given addresses to their eventually consistent BNB balances.
@@ -113,4 +116,13 @@ export function useCurrencyBalances(
 
 export function useCurrencyBalance(account?: string, currency?: Currency): CurrencyAmount | undefined {
   return useCurrencyBalances(account, [currency])[0]
+}
+
+// mimics useAllBalances
+export function useAllTokenBalances(): { [tokenAddress: string]: TokenAmount | undefined } {
+  const { account } = useWeb3React()
+  const allTokens = useAllTokens()
+  const allTokensArray = useMemo(() => Object.values(allTokens ?? {}), [allTokens])
+  const balances = useTokenBalances(account ?? undefined, allTokensArray)
+  return balances ?? {}
 }

@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 import React, { useCallback, useEffect, useState } from 'react'
 import { Currency } from '@pancakeswap/sdk';
+=======
+import React, { useCallback, useState } from 'react'
+import { Currency, Token } from '@pancakeswap/sdk';
+>>>>>>> ba2e3f2e4b4db1f28c1a0c19a10aca4d43752747
 import classNames from 'classnames';
 import { CloseIcon, LoadingIcon } from "../icons";
 import defaultTokens from './defaultTokens'
@@ -7,9 +12,12 @@ import defaultTokens from './defaultTokens'
 import styles from './index.module.scss'
 import useDebounce from 'hooks/useDebounce';
 import { useToken } from 'hooks/useTokens';
+<<<<<<< HEAD
 import { isAddress } from '@ethersproject/address';
 
 let timeout: any;
+=======
+>>>>>>> ba2e3f2e4b4db1f28c1a0c19a10aca4d43752747
 
 export declare type Handler = () => void;
 
@@ -20,6 +28,7 @@ export interface InjectedProps {
 
 interface ModalSelectCurrencyProps extends InjectedProps {}
 
+<<<<<<< HEAD
 export default function ModalSelectCurrency({ onDismiss, onCurrencySelect }: ModalSelectCurrencyProps) {  
   const [result, setResult] = useState<any>(null)
   const [search, setSearch] = useState("")
@@ -70,6 +79,26 @@ export default function ModalSelectCurrency({ onDismiss, onCurrencySelect }: Mod
     // )
   }
 
+=======
+export default function ModalSelectCurrency({ onDismiss, onCurrencySelect }: ModalSelectCurrencyProps) { 
+  const [searchQuery, setSearchQuery] = useState<string>('')
+  const debouncedQuery = useDebounce(searchQuery, 200)
+
+  // if they input an address, use it
+  const searchToken = useToken(debouncedQuery)
+  const handleInput = useCallback((event) => {
+    const input = event.target.value
+    setSearchQuery(input)
+  }, [])
+
+  const handleOnChange = (_token: Token) => {
+    onCurrencySelect(_token)
+    if (onDismiss) {
+      onDismiss()
+    }
+  }
+  
+>>>>>>> ba2e3f2e4b4db1f28c1a0c19a10aca4d43752747
   return (
     <div className={styles.wrapper}>
       <div className="modal">
@@ -87,6 +116,7 @@ export default function ModalSelectCurrency({ onDismiss, onCurrencySelect }: Mod
               className="w-100" 
               onChange={handleInput} 
             />
+<<<<<<< HEAD
             {
               loading
               ? <div className="wrapper-loading-icon">
@@ -108,6 +138,18 @@ export default function ModalSelectCurrency({ onDismiss, onCurrencySelect }: Mod
                       </div> 
                     : null
                   )
+=======
+            <div className={classNames("list-results", { "is-show": searchQuery || searchToken})}>
+              {
+                searchToken
+                ? <div className="result-item" onClick={() => handleOnChange(searchToken)}>
+                    <span className="result-name">{ searchToken.name } ({ searchToken.symbol })</span><br />
+                    <small className="result-address">{ searchToken.address }</small>
+                  </div>
+                : <div className="result-item">
+                    <span>{ searchToken === null ? "Loading..." : "Not found"}</span>
+                  </div> 
+>>>>>>> ba2e3f2e4b4db1f28c1a0c19a10aca4d43752747
               }
             </div>
           </div>

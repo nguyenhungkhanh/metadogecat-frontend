@@ -75,7 +75,6 @@ export default function SwapPage() {
   useEffect(() => {
     console.log('importTokensNotInDefault', importTokensNotInDefault)
   }, [importTokensNotInDefault])
-  console.log("v2Trade", v2Trade, currencies, recipient, parsedAmount);
 
   const {
     wrapType,
