@@ -3,6 +3,8 @@ import { Provider } from 'react-redux'
 import { Web3ReactProvider } from '@web3-react/core'
 import { getLibrary } from 'utils/web3React'
 import { RefreshContextProvider } from 'contexts/RefeshContext'
+import { ModalProvider } from 'contexts/ModalContext'
+
 import store from 'state'
 
 const Providers: React.FC = ({ children }) => {
@@ -10,7 +12,9 @@ const Providers: React.FC = ({ children }) => {
     <Web3ReactProvider getLibrary={getLibrary}>
       <Provider store={store}>
         <RefreshContextProvider>
-          {children}
+          <ModalProvider>
+            {children}
+          </ModalProvider>
         </RefreshContextProvider>
       </Provider>
     </Web3ReactProvider>

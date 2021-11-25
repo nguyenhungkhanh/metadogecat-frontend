@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Token, Currency, ETHER } from "@pancakeswap/sdk";
 import { arrayify } from 'ethers/lib/utils'
 import { parseBytes32String } from '@ethersproject/strings'
@@ -71,52 +71,29 @@ function parseStringOrBytes32(str: string | undefined, bytes32: string | undefin
 // otherwise returns the token
 export function useToken(tokenAddress?: string): Token | undefined | null {
   const { chainId } = useActiveWeb3React()
-  const tokens = useAllTokens()
+  const [token, setToken] = useState<Token | undefined | null>(null)
 
   const address = isAddress(tokenAddress)
-
   const tokenContract = useTokenContract(address || undefined, false)
-  const tokenContractBytes32 = useBytes32TokenContract(address || undefined, false)
-  const token: Token | undefined = address ? tokens[address] : undefined
 
-  const tokenName = useSingleCallResult(token ? undefined : tokenContract, 'name', undefined, NEVER_RELOAD)
-  const tokenNameBytes32 = useSingleCallResult(
-    token ? undefined : tokenContractBytes32,
-    'name',
-    undefined,
-    NEVER_RELOAD,
-  )
-  const symbol = useSingleCallResult(token ? undefined : tokenContract, 'symbol', undefined, NEVER_RELOAD)
-  const symbolBytes32 = useSingleCallResult(token ? undefined : tokenContractBytes32, 'symbol', undefined, NEVER_RELOAD)
-  const decimals = useSingleCallResult(token ? undefined : tokenContract, 'decimals', undefined, NEVER_RELOAD)
+  useEffect(() => {
+    async function getTokenInfo() {
+      const name = await tokenContract.name()
+      const decimals = await tokenContract.decimals()
+      const symbol = await tokenContract.symbol()
 
-  return useMemo(() => {
-    if (token) return token
-    if (!chainId || !address) return undefined
-    if (decimals.loading || symbol.loading || tokenName.loading) return null
-    if (decimals.result) {
-      return new Token(
-        chainId,
-        address,
-        decimals.result[0],
-        parseStringOrBytes32(symbol.result?.[0], symbolBytes32.result?.[0], 'UNKNOWN'),
-        parseStringOrBytes32(tokenName.result?.[0], tokenNameBytes32.result?.[0], 'Unknown Token'),
-      )
+      setToken(new Token(chainId, address, decimals, symbol, name))
     }
-    return undefined
-  }, [
-    address,
-    chainId,
-    decimals.loading,
-    decimals.result,
-    symbol.loading,
-    symbol.result,
-    symbolBytes32.result,
-    token,
-    tokenName.loading,
-    tokenName.result,
-    tokenNameBytes32.result,
-  ])
+    if (!token) {
+      if (!address || !tokenContract) {
+        setToken(undefined)
+      } else {
+        getTokenInfo()
+      }
+    }
+  }, [address, chainId, token, tokenContract])
+  
+  return token;
 }
 
 export function useCurrency(currencyId: string | undefined): Currency | null | undefined {
