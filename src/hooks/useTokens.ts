@@ -1,14 +1,11 @@
 // @ts-nocheck
 import { useEffect, useMemo, useState } from "react";
 import { Token, Currency, ETHER } from "@pancakeswap/sdk";
-import { arrayify } from 'ethers/lib/utils'
-import { parseBytes32String } from '@ethersproject/strings'
 import useUserAddedTokens from "state/user/hooks/useUserAddedTokens";
 import { TokenAddressMap, useUnsupportedTokenList, useCombinedActiveList, useCombinedInactiveList } from "state/lists/hooks";
 import useActiveWeb3React from "hooks/useActiveWeb3React";
 import { isAddress } from 'utils'
-import { useBytes32TokenContract, useTokenContract } from 'hooks/useContract'
-import { NEVER_RELOAD, useSingleCallResult } from 'state/multicall/hooks'
+import { useTokenContract } from 'hooks/useContract'
 
 // reduce token map into standard address <-> Token mapping, optionally include user added tokens
 function useTokensFromMap(
@@ -52,18 +49,6 @@ function useTokensFromMap(
 export function useAllTokens(): { [address: string]: Token } {
   const allTokens = useCombinedActiveList()
   return useTokensFromMap(allTokens, true)
-}
-
-// parse a name or symbol from a token response
-const BYTES32_REGEX = /^0x[a-fA-F0-9]{64}$/
-
-function parseStringOrBytes32(str: string | undefined, bytes32: string | undefined, defaultValue: string): string {
-  return str && str.length > 0
-    ? str
-    : // need to check for proper bytes string and valid terminator
-    bytes32 && BYTES32_REGEX.test(bytes32) && arrayify(bytes32)[31] === 0
-    ? parseBytes32String(bytes32)
-    : defaultValue
 }
 
 // undefined if invalid or does not exist
