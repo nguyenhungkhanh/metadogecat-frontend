@@ -199,10 +199,26 @@ export default function SwapPage() {
     // }
   }, [currencies.INPUT, onUserInput]);
 
+  const handleInputSelect = useCallback(
+    (inputCurrency) => {
+      setApprovalSubmitted(false) // reset 2 step UI for approvals
+      onCurrencySelection(Field.INPUT, inputCurrency)
+    },
+    [onCurrencySelection],
+  )
+
+  const handleOutputSelect = useCallback(
+    (outputCurrency) => {
+      onCurrencySelection(Field.OUTPUT, outputCurrency)
+    },
+
+    [onCurrencySelection],
+  )
+
   const isValid = !swapInputError
 
   return (
-    <div className="flex justify-center mt-4 bg-gray-200">
+    <div className="flex justify-center mt-4">
       <div className="w-full max-w-md mx-auto">
         <div className="mb-4">
           <button
@@ -233,6 +249,7 @@ export default function SwapPage() {
               currency={currencies[Field.INPUT]}
               showMaxButton={true}
               onMax={handleMaxInput}
+              onCurrencySelect={handleInputSelect}
             />
           </div>
           <div className="mb-4">
@@ -249,6 +266,7 @@ export default function SwapPage() {
               value={formattedAmounts[Field.OUTPUT]}
               onChange={(value) => onUserInput(Field.OUTPUT, value)}
               currency={currencies[Field.OUTPUT]}
+              onCurrencySelect={handleOutputSelect}
             />
           </div>
           {trade ? (

@@ -2,15 +2,18 @@ import React from "react";
 import { Currency } from "@pancakeswap/sdk";
 import useActiveWeb3React from "hooks/useActiveWeb3React";
 import { useCurrencyBalance } from "state/wallet/hooks";
-import ModalSelectCurrency from './ModalSelectCurrency';
+import ModalSelectCurrency from 'components/ModalSelectCurrency';
+
+import useModal from "hooks/useModal";
 
 interface CurrencyInputProps {
-  value: string;
-  onChange: (value: string) => void;
-  onMax?: () => void;
-  showMaxButton?: boolean;
-  label?: string;
-  currency?: Currency | null;
+  value: string
+  onChange: (value: string) => void
+  onMax?: () => void
+  showMaxButton?: boolean
+  label?: string
+  currency?: Currency | null
+  onCurrencySelect: (currency: Currency) => void
 }
 
 export default function CurrencyInput({
@@ -20,12 +23,19 @@ export default function CurrencyInput({
   showMaxButton,
   label,
   currency,
+  onCurrencySelect
 }: CurrencyInputProps) {
   const { account } = useActiveWeb3React();
   const selectedCurrencyBalance = useCurrencyBalance(
     account ?? undefined,
     currency ?? undefined
   );
+
+  const [onPresentModal] = useModal(
+    <ModalSelectCurrency 
+      onCurrencySelect={onCurrencySelect}
+    />,
+  )
 
   const handleOnChange = (event: any) => {
     onChange(event.target.value);
@@ -53,10 +63,9 @@ export default function CurrencyInput({
             ? <div onClick={onMax}>MAX</div>
             : null
           }
-          <div className="px-2">{ currency?.symbol || 'Select a currency' }</div>
+          <div onClick={onPresentModal} className="px-2">{ currency?.symbol || 'Select a currency' }</div>
         </div>
       </div>
-      <ModalSelectCurrency />
     </div>
   );
 }

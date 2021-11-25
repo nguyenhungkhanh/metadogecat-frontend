@@ -7,6 +7,8 @@ import ListsUpdater from 'state/lists/updater'
 import TransactionUpdater from './state/transactions/updater'
 import MulticallUpdater from 'state/multicall/updater'
 import './styles/index.scss';
+import './animation.scss'
+import './index.scss'
 
 function Updaters() {
   return (
