@@ -16,7 +16,7 @@
 
 body {
   font-family: 'Roboto', sans-serif;
-  color: #c6d3e7;
+  color: #c6d3e7 !important;
   background-color: #0f1724;
 }
 
@@ -37,6 +37,7 @@ input {
   border: 0;
   outline: none;
   padding-left: 0.5rem;
+  color: #c6d3e7 !important;
 }
 /* Chrome, Safari, Edge, Opera */
 input::-webkit-outer-spin-button,

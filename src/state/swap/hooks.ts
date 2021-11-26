@@ -91,6 +91,7 @@ export function useDerivedSwapInfo(): {
 
   const inputCurrency = useCurrency(inputCurrencyId);
   const outputCurrency = useCurrency(outputCurrencyId);
+  console.log('outputCurrency', outputCurrencyId)
   const recipientLookup = useENS(recipient ?? undefined);
   const to: string | null =
     (recipient === null ? account : recipientLookup.address) ?? null;
@@ -290,6 +291,7 @@ export function useSwapActionHandlers(): {
   const dispatch = useDispatch<AppDispatch>()
   const onCurrencySelection = useCallback(
     (field: Field, currency: Currency) => {
+      console.log(currency)
       dispatch(
         selectCurrency({
           field,
@@ -324,4 +326,38 @@ export function useSwapActionHandlers(): {
     onUserInput,
     onChangeRecipient,
   }
+}
+
+// updates the swap state to use the defaults for a given network
+export function useLoadCurrency():
+  | { inputCurrencyId: string | undefined; outputCurrencyId: string | undefined }
+  | undefined {
+  const { chainId } = useActiveWeb3React()
+  const dispatch = useDispatch<AppDispatch>()
+  const parsedQs = useParsedQueryString()
+  const [result, setResult] = useState<
+    { inputCurrencyId: string | undefined; outputCurrencyId: string | undefined } | undefined
+  >()
+
+  useEffect(() => {
+    if (!chainId) return
+    const parsed = queryParametersToSwapState(parsedQs)
+
+    console.log(parsed)
+    
+    dispatch(
+      replaceSwapState({
+        typedValue: parsed.typedValue,
+        field: parsed.independentField,
+        inputCurrencyId: parsed[Field.INPUT].currencyId,
+        outputCurrencyId: parsed[Field.OUTPUT].currencyId,
+        recipient: null,
+      }),
+    )
+
+    setResult({ inputCurrencyId: parsed[Field.INPUT].currencyId, outputCurrencyId: parsed[Field.OUTPUT].currencyId })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch, chainId])
+
+  return result
 }

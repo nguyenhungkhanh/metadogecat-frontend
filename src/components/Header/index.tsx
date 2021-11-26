@@ -1,15 +1,22 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
+import classNames from 'classnames';
 import { useHistory, useParams } from 'react-router';
 import { SearchIcon, LoadingIcon, WalletIcon } from "components/icons";
+import useActiveWeb3React from 'hooks/useActiveWeb3React';
 import logoImage from "assets/images/logo.png";
-
+import ModalWalletConnect from 'components/ModalWalletConnect';
 import styles from './index.module.scss';
-import classNames from 'classnames';
+import useModal from 'hooks/useModal';
 
 let timeout: any;
 
+const formattedAccount = (account: string) => {
+  return account?.slice(0, 2) + "..." + account?.slice(-4)
+}
+
 function Header() {
   const history = useHistory()
+  const { account } = useActiveWeb3React()
   const params: any = useParams()
 
   const [search, setSearch] = useState("")
@@ -20,6 +27,10 @@ function Header() {
   const handleOnChange = (event: any) => {
     setSearch(event?.target?.value)
   }
+
+  const [onPresentModal] = useModal(
+    <ModalWalletConnect />,
+  )
 
   return (
     <div className={styles.wrapper}>
@@ -67,9 +78,9 @@ function Header() {
             </div>
           </div>
         </div>
-        <div className="connect-wallet-btn" onClick={() => {}}>
+        <div className="connect-wallet-btn" onClick={onPresentModal}>
           <div className="wrapper-wallet-address">
-            {/* { account ? formattedAccount(account) : "Connect wallet" } */}
+            { account ? formattedAccount(account) : "Connect wallet" }
             <div className="livenow" />
           </div>
           <div className="wrapper-wallet-icon">

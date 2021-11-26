@@ -20,7 +20,7 @@ export default function App() {
         <Route path="/" exact>
           <Home />
         </Route>
-        <Route exact strict path="/swap" component={Swap} />
+        <Route path="/tokens/:tokenAddress" component={Swap} />
       </Switch>
     </Router>
   )
