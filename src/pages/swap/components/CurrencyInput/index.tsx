@@ -6,6 +6,8 @@ import ModalSelectCurrency from 'components/ModalSelectCurrency';
 
 import useModal from "hooks/useModal";
 
+import styles from './index.module.scss'
+
 interface CurrencyInputProps {
   value: string
   onChange: (value: string) => void
@@ -42,17 +44,20 @@ export default function CurrencyInput({
   };
 
   return (
-    <div className="shadow border rounded bg-white">
+    <div className={styles.wrapper}>
       <div className="flex justify-between">
         <div>{label}</div>
-        <div>
-          Balance: {selectedCurrencyBalance?.toSignificant(6) ?? "Loading"}
-        </div>
+        {
+          account && currency
+          ? <div>
+              Balance: {selectedCurrencyBalance?.toSignificant(6) ?? "Loading"}
+            </div>
+          : null
+        }
       </div>
-      <div className="flex items-center">
+      <div className="wrapper-input flex items-center">
         <input
           className="flex-1 appearance-none w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          id="from"
           value={value}
           onChange={handleOnChange}
           placeholder="0.0"

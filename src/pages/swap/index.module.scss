@@ -1,0 +1,32 @@
+.wrapper {
+  background-color: #090f19;
+  width: 100%;
+  max-width: 400px;
+  :global {
+    .wrapper-switch-icon {
+      cursor: pointer;
+      text-align: center;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background-color: #0f1724;
+      margin: 0.5rem auto;
+      transform: rotate(90deg);
+      box-shadow: rgba(0, 0, 0, 0.27) 0px 2px 3px 2px;
+      &:hover {
+        svg {
+          fill: #c6d3e7;
+        }
+      }
+    }
+    .swap-info {
+      background-color: #0f1724;
+      padding: .5rem;
+      font-size: 14px;
+      box-shadow: rgba(0, 0, 0, 0.27) 0px 2px 3px 2px;
+    }
+  }
+}

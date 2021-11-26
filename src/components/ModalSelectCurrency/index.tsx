@@ -7,8 +7,7 @@ import defaultTokens from './defaultTokens'
 import styles from './index.module.scss'
 import useDebounce from 'hooks/useDebounce';
 import { useToken } from 'hooks/useTokens';
-
-export declare type Handler = () => void;
+import { Handler } from 'contexts/ModalContext';
 
 export interface InjectedProps {
   onDismiss?: Handler

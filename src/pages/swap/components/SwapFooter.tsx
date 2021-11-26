@@ -1,13 +1,10 @@
-import { TradeType } from "@pancakeswap/sdk";
 import React, { useMemo } from "react";
+import { TradeType } from "@pancakeswap/sdk";
 import { Field } from "state/swap/actions";
-import {
-  computeSlippageAdjustedAmounts,
-  computeTradePriceBreakdown,
-  warningSeverity,
-} from "utils/prices";
+import { computeSlippageAdjustedAmounts, computeTradePriceBreakdown } from "utils/prices";
 import useLastTruthy from "hooks/useLast";
 import { ONE_BIPS } from "configs/contants";
+import TradePrice from "./TradePrice";
 
 export default function SwapFooter({
   trade,
@@ -27,34 +24,52 @@ export default function SwapFooter({
     () => computeTradePriceBreakdown(trade),
     [trade]
   );
-  const severity = warningSeverity(priceImpactWithoutFee);
 
   if (!lastTrade) return null;
 
   return (
     <div>
-      {trade.tradeType === TradeType.EXACT_INPUT
-        ? slippageAdjustedAmounts[Field.OUTPUT]?.toSignificant(4) ?? "-"
-        : slippageAdjustedAmounts[Field.INPUT]?.toSignificant(4) ?? "-"}
-
+      <div>
+        <span className="text-muted">
+          {trade.tradeType === TradeType.EXACT_INPUT ? 'Minimum received: ' : 'Maximum sold: '}
+        </span>
+        <span>
+          {
+            trade.tradeType === TradeType.EXACT_INPUT
+              ? slippageAdjustedAmounts[Field.OUTPUT]?.toSignificant(4) ?? "-"
+              : slippageAdjustedAmounts[Field.INPUT]?.toSignificant(4) ?? "-"
+          }
+        </span>
+        <span>
+          {
+            trade.tradeType === TradeType.EXACT_INPUT
+              ? ` ${trade.outputAmount.currency.symbol}`
+              : ` ${trade.inputAmount.currency.symbol}`
+          }
+        </span>
+      </div>
       <p>
-        Price impact:{" "}
-        {priceImpactWithoutFee
-          ? priceImpactWithoutFee.lessThan(ONE_BIPS)
-            ? "<0.01%"
-            : `${priceImpactWithoutFee.toFixed(2)}%`
-          : "-"}
+        <span className="text-muted">Price impact: </span>
+        <span>
+          {priceImpactWithoutFee
+            ? priceImpactWithoutFee.lessThan(ONE_BIPS)
+              ? "<0.01%"
+              : `${priceImpactWithoutFee.toFixed(2)}%`
+            : "-"
+          }
+        </span>
       </p>
       <p>
-        {realizedLPFee
-          ? `${realizedLPFee?.toSignificant(6)} ${
-              trade.inputAmount.currency.symbol
-            }`
-          : "-"}
+        <span className="text-muted">Liquidity Provider Fee: </span> 
+        <span>
+          {
+            realizedLPFee
+              ? `${realizedLPFee?.toSignificant(6)} ${trade.inputAmount.currency.symbol}`
+              : "-"
+          }
+        </span>
       </p>
-      <button className="bg-green-500 active:bg-green-700 px-4 py-2">
-        {severity > 2 ? "Swap Anyway" : "Confirm Swap"}
-      </button>
+      <TradePrice price={trade?.executionPrice} />
     </div>
   );
 }

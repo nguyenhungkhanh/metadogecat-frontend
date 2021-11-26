@@ -47,8 +47,24 @@ function useTokensFromMap(
 }
 
 export function useAllTokens(): { [address: string]: Token } {
+  const { chainId } = useActiveWeb3React()
   const allTokens = useCombinedActiveList()
-  return useTokensFromMap(allTokens, true)
+  // return useTokensFromMap(allTokens, true)
+  // address: "0x55d398326f99059fF775485246999027B3197955"
+  // chainId: 56
+  // decimals: 18
+  // name: "Tether USD"
+  // projectLink: undefined
+  // symbol: "USDT"
+  return {
+    "0x55d398326f99059fF775485246999027B3197955": new Token(
+      chainId,
+      "0x55d398326f99059fF775485246999027B3197955",
+      18,
+      "USDT",
+      "Tether USD"
+    )
+  }
 }
 
 // undefined if invalid or does not exist

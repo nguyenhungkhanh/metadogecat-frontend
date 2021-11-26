@@ -1,0 +1,11 @@
+.wrapper {
+  :global {
+    .wrapper-input {
+      background-color: #0f1724;
+      box-shadow: rgba(0, 0, 0, 0.27) 0px 2px 3px 2px;
+      input {
+        background-color: transparent;
+      }
+    }
+  }
+}
