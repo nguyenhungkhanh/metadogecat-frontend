@@ -5,7 +5,7 @@ import { unwrappedToken } from 'utils/wrappedCurrency'
 export default memo(function SwapRoute({ trade }: { trade: Trade }) {
   if (!trade) return null
   return (
-    <div className="flex">
+    <div className="flex text-muted">
       {trade.route.path.map((token, i, path) => {
         const isLastItem: boolean = i === path.length - 1
         const currency = unwrappedToken(token)

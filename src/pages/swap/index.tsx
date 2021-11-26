@@ -33,6 +33,7 @@ import classNames from "classnames";
 
 import styles from "./index.module.scss";
 import SwapRoute from "./components/SwapRoute";
+import { Button } from "components/Elements";
 
 export default function SwapPage() {
   useLoadCurrency();
@@ -220,9 +221,9 @@ export default function SwapPage() {
               onCurrencySelect={handleOutputSelect}
             />
           </div>
-          <div>
+          <div className="mb-4">
             {showWrap ? (
-              <button disabled={Boolean(wrapInputError)} onClick={onWrap}>
+              <Button disabled={Boolean(wrapInputError)} onClick={onWrap}>
                 {wrapInputError ??
                   (wrapType === WrapType.WRAP ? (
                     "Wrap"
@@ -236,10 +237,10 @@ export default function SwapPage() {
                       )}
                     </div>
                   ) : null)}
-              </button>
+              </Button>
             ) : showApproveFlow ? (
               <div>
-                <button
+                <Button
                   className={
                     approval === ApprovalState.APPROVED ? "success" : "primary"
                   }
@@ -256,15 +257,14 @@ export default function SwapPage() {
                   ) : (
                     `Enable ${currencies[Field.INPUT]?.symbol}`
                   )}
-                </button>
-                <button
+                </Button>
+                <Button
                   className={
                     isValid && priceImpactSeverity > 2 ? "danger" : "primary"
                   }
                   onClick={() => {
                     console.log("Handle swap");
                   }}
-                  id="swap-button"
                   disabled={
                     !isValid ||
                     approval !== ApprovalState.APPROVED ||
@@ -276,19 +276,18 @@ export default function SwapPage() {
                     : priceImpactSeverity > 2
                     ? "Swap Anyway"
                     : "Swap"}
-                </button>
+                </Button>
               </div>
             ) : (
-              <button
+              <Button
                 className={
                   isValid && priceImpactSeverity > 2 && !swapCallbackError
                     ? "danger"
-                    : "primary"
+                    : "w-full primary"
                 }
                 onClick={() => {
                   console.log("Handle swap");
                 }}
-                id="swap-button"
                 disabled={
                   !isValid || priceImpactSeverity > 3 || !!swapCallbackError
                 }
@@ -299,12 +298,12 @@ export default function SwapPage() {
                     : priceImpactSeverity > 2
                     ? "Swap Anyway"
                     : "Swap")}
-              </button>
+              </Button>
             )}
           </div>
           {
             trade 
-            ? <div className="swap-info">
+            ? <div className="swap-info mb-4">
                 <SwapFooter trade={trade} allowedSlippage={allowedSlippage} />
               </div>
             : null

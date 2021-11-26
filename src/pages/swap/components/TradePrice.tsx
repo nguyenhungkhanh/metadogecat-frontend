@@ -16,13 +16,11 @@ export default function TradePrice({ price }: TradePriceProps) {
     : `${price?.baseCurrency?.symbol}/${price?.quoteCurrency?.symbol}`
 
   if (!show) return <span>-</span>
-  
+
   return (
-    <div className="flex">
-      <div className="mr">
-        <span className="text-muted">Price: </span> 
-        <span>{formattedPrice ?? '-'} {label}</span>
-      </div>
+    <div>
+      <span className="text-muted">Price: </span> 
+      <span>{formattedPrice ?? '-'} {label} </span>
       <span onClick={() => setShowInverted(!showInverted)}>
         invert
       </span>
