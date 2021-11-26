@@ -57,18 +57,22 @@ export default function CurrencyInput({
       </div>
       <div className="wrapper-input flex items-center">
         <input
-          className="flex-1 appearance-none w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          className="flex-1 py-2 px-3 w-full"
           value={value}
           onChange={handleOnChange}
           placeholder="0.0"
+          type="number"
+          min={0}
         />
         <div className="flex">
           {
             showMaxButton
-            ? <div onClick={onMax}>MAX</div>
+            ? <div onClick={onMax} className="flex items-center text-xs text-success pointer">
+                <button className="btn-max">MAX</button>
+              </div>
             : null
           }
-          <div onClick={onPresentModal} className="px-2">{ currency?.symbol || 'Select a currency' }</div>
+          <div onClick={onPresentModal} className="pointer px-2 font-medium">{ currency?.symbol || 'Select a currency' }</div>
         </div>
       </div>
     </div>

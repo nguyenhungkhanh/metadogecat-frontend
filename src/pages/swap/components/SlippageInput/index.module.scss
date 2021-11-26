@@ -7,10 +7,11 @@
         background-color: transparent;
       }
       button {
-        transition: 0.15s linear;
-        &:active {
-          transform: translateY(1px);
-        }
+        background-color: #11ece5;
+        height: 32px;
+        color: #000;
+        display: flex;
+        line-height: 32px;
       }
     }
   }

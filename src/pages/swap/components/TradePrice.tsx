@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Price } from '@pancakeswap/sdk'
+import { RefreshIcon } from 'components/icons'
 
 interface TradePriceProps {
   price?: Price
@@ -20,9 +21,9 @@ export default function TradePrice({ price }: TradePriceProps) {
   return (
     <div>
       <span className="text-muted">Price: </span> 
-      <span>{formattedPrice ?? '-'} {label} </span>
-      <span onClick={() => setShowInverted(!showInverted)}>
-        invert
+      <span className="pointer" onClick={() => setShowInverted(!showInverted)}>
+        <RefreshIcon fill="#c6d3e7" />
+        <span> {formattedPrice ?? '-'} {label} </span>
       </span>
     </div>
   )

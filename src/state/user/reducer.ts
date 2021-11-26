@@ -4,6 +4,7 @@ import { SerializedToken } from 'configs/contants/types'
 import {
   addSerializedToken,
   updateUserSingleHopOnly,
+  updateUserSlippageTolerance,
 } from './actions'
 import { GAS_PRICE_GWEI } from './hooks/helpers'
 
@@ -39,6 +40,10 @@ export default createReducer(initialState, (builder) =>
   builder
     .addCase(updateUserSingleHopOnly, (state, action) => {
       state.userSingleHopOnly = action.payload.userSingleHopOnly
+    })
+    .addCase(updateUserSlippageTolerance, (state, action) => {
+      state.userSlippageTolerance = action.payload.userSlippageTolerance
+      state.timestamp = new Date().getTime()
     })
     .addCase(addSerializedToken, (state, { payload: { serializedToken } }) => {
       if (!state.tokens) {

@@ -16,3 +16,4 @@ export { default as CopyIcon } from "./CopyIcon";
 export { default as WalletIcon } from "./WalletIcon";
 export { default as BuyIcon } from "./BuyIcon";
 export { default as SellIcon } from "./SellIcon";
+export { default as RefreshIcon } from './RefreshIcon';
