@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react'
 import { Currency, Token } from '@pancakeswap/sdk';
 import classNames from 'classnames';
-import { CloseIcon, LoadingIcon } from "../icons";
+import { CloseIcon } from "../icons";
 import defaultTokens from './defaultTokens'
 
 import styles from './index.module.scss'
