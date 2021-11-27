@@ -183,17 +183,32 @@ export default function SwapPage() {
     }
   }, [maxAmountInput, onUserInput]);
 
+  // const inputCurrency = useCurrency("BNB")
+  const outputCurrency = useCurrency(params?.tokenAddress)
+
+  // useEffect(() => {
+  //   if (inputCurrency && !currencies[Field.INPUT]) {
+  //     onCurrencySelection(Field.INPUT, inputCurrency)
+  //   }
+  // }, [currencies, inputCurrency, onCurrencySelection])
+
   useEffect(() => {
-    async function loadCurrency() {
-      const outputCurrency = await getTokenInfo(library, chainId, params?.tokenAddress)
-      if (outputCurrency) {
-        onCurrencySelection(Field.OUTPUT, outputCurrency)
-      }
+    if (outputCurrency && !currencies[Field.OUTPUT]) {
+      onCurrencySelection(Field.OUTPUT, outputCurrency)
     }
-    if (chainId && library) {
-      loadCurrency()
-    }
-  }, [chainId, library, onCurrencySelection, params?.tokenAddress])
+  }, [currencies, outputCurrency, onCurrencySelection])
+
+  // useEffect(() => {
+  //   async function loadCurrency() {
+  //     const outputCurrency = await getTokenInfo(library, chainId, params?.tokenAddress)
+  //     if (outputCurrency) {
+  //       onCurrencySelection(Field.OUTPUT, outputCurrency)
+  //     }
+  //   }
+  //   if (chainId && library) {
+  //     loadCurrency()
+  //   }
+  // }, [chainId, library, onCurrencySelection, params?.tokenAddress])
 
   const handleInputSelect = useCallback(
     (inputCurrency) => {

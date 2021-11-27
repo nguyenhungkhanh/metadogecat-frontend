@@ -52,6 +52,8 @@ function useSwapCallArguments(
   const recipient = recipientAddressOrName === null ? account : recipientAddress
   const deadline = useTransactionDeadline()
 
+  console.log('deadline', deadline)
+
   return useMemo(() => {
     if (!trade || !recipient || !library || !account || !chainId || !deadline) return []
 
@@ -119,21 +121,26 @@ export function useSwapCallback(
       callback: async function onSwap(): Promise<string> {
         const estimatedCalls: EstimatedSwapCall[] = await Promise.all(
           swapCalls.map((call) => {
-            const {
-              parameters: { methodName, args, value },
-              contract,
-            } = call
+            const { parameters: { methodName, args, value }, contract } = call
+
             const options = !value || isZero(value) ? {} : { value }
+
+            console.log('methodName', methodName, args, options)
 
             return contract.estimateGas[methodName](...args, options)
               .then((gasEstimate) => {
-                return {
-                  call,
-                  gasEstimate,
-                }
+                console.log('gasEstimate', gasEstimate)
+                return { call, gasEstimate }
               })
-              .catch((gasError) => {
+              .catch(async (gasError) => {
+                console.log('gasError', gasError, allowedSlippage)
                 console.error('Gas estimate failed, trying eth_call to extract error', call)
+
+                console.log('contract', contract, methodName, ...args, options)
+
+                const response = await contract.callStatic[methodName](...args, options)
+
+                console.log('response', response)
 
                 return contract.callStatic[methodName](...args, options)
                   .then((result) => {
