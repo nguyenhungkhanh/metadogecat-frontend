@@ -63,9 +63,24 @@ table {
 button {
   cursor: pointer;
   outline: none;
-  border: none;
+  border: 1px solid #11ece5;
+  color: #000;
+  &.primary {
+    background-color: #11ece5;
+  }
+  &.success {
+    background-color: #28a745;
+    border-color: #28a745;
+    color: #000;
+  }
+  &.danger {
+    background-color: red;
+    border-color: red;
+    color: #000;
+  }
   &:disabled {
     opacity: 0.65;
+    cursor: not-allowed;
   }
 }
 

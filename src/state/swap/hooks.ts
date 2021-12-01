@@ -23,6 +23,7 @@ import { useUserSlippageTolerance } from "state/user/hooks";
 import { computeSlippageAdjustedAmounts } from "utils/prices";
 import useParsedQueryString from "hooks/useParsedQueryString";
 import { SwapState } from "./reducer";
+import { useParams } from "react-router";
 
 export function useSwapState(): AppState["swap"] {
   return useSelector<AppState, AppState["swap"]>((state) => state.swap);
@@ -91,7 +92,7 @@ export function useDerivedSwapInfo(): {
 
   const inputCurrency = useCurrency(inputCurrencyId);
   const outputCurrency = useCurrency(outputCurrencyId);
-  console.log('outputCurrency', outputCurrencyId)
+  console.log('outputCurrency', outputCurrencyId, outputCurrency)
   const recipientLookup = useENS(recipient ?? undefined);
   const to: string | null =
     (recipient === null ? account : recipientLookup.address) ?? null;
@@ -291,7 +292,7 @@ export function useSwapActionHandlers(): {
   const dispatch = useDispatch<AppDispatch>()
   const onCurrencySelection = useCallback(
     (field: Field, currency: Currency) => {
-      console.log(currency)
+      console.log('onCurrencySelection', currency)
       dispatch(
         selectCurrency({
           field,
@@ -329,35 +330,24 @@ export function useSwapActionHandlers(): {
 }
 
 // updates the swap state to use the defaults for a given network
-export function useLoadCurrency():
-  | { inputCurrencyId: string | undefined; outputCurrencyId: string | undefined }
-  | undefined {
+export function useLoadCurrency() {
   const { chainId } = useActiveWeb3React()
+  const params: any = useParams()
   const dispatch = useDispatch<AppDispatch>()
-  const parsedQs = useParsedQueryString()
-  const [result, setResult] = useState<
-    { inputCurrencyId: string | undefined; outputCurrencyId: string | undefined } | undefined
-  >()
+
+  console.log('params?.tokenAddress', params?.tokenAddress)
 
   useEffect(() => {
     if (!chainId) return
-    const parsed = queryParametersToSwapState(parsedQs)
 
-    console.log(parsed)
-    
     dispatch(
       replaceSwapState({
-        typedValue: parsed.typedValue,
-        field: parsed.independentField,
-        inputCurrencyId: parsed[Field.INPUT].currencyId,
-        outputCurrencyId: parsed[Field.OUTPUT].currencyId,
+        typedValue: "",
+        field: Field.INPUT,
+        inputCurrencyId: 'BNB',
+        outputCurrencyId: params?.tokenAddress,
         recipient: null,
       }),
     )
-
-    setResult({ inputCurrencyId: parsed[Field.INPUT].currencyId, outputCurrencyId: parsed[Field.OUTPUT].currencyId })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, chainId])
-
-  return result
+  }, [dispatch, chainId, params?.tokenAddress])
 }

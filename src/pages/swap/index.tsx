@@ -41,7 +41,7 @@ export default function SwapPage() {
   const params: any = useParams();
   const { chainId, library } = useActiveWeb3React();
 
-  const [allowedSlippage, setAllowedSlippage] = useUserSlippageTolerance();
+  const [allowedSlippage] = useUserSlippageTolerance();
   const [singleHopOnly] = useUserSingleHopOnly();
 
   // swap state
@@ -54,10 +54,9 @@ export default function SwapPage() {
     inputError: swapInputError,
   } = useDerivedSwapInfo();
 
-  console.log(currencies);
+  console.log('currencies', currencies);
 
-  const { onSwitchTokens, onCurrencySelection, onUserInput } =
-    useSwapActionHandlers();
+  const { onSwitchTokens, onCurrencySelection, onUserInput } = useSwapActionHandlers();
 
   const {
     wrapType,
@@ -183,17 +182,17 @@ export default function SwapPage() {
     }
   }, [maxAmountInput, onUserInput]);
 
-  useEffect(() => {
-    async function loadCurrency() {
-      const outputCurrency = await getTokenInfo(library, chainId, params?.tokenAddress)
-      if (outputCurrency) {
-        onCurrencySelection(Field.OUTPUT, outputCurrency)
-      }
-    }
-    if (chainId && library) {
-      loadCurrency()
-    }
-  }, [chainId, library, onCurrencySelection, params?.tokenAddress])
+  // useEffect(() => {
+  //   async function loadCurrency() {
+  //     const outputCurrency = await getTokenInfo(library, chainId, params?.tokenAddress)
+  //     if (outputCurrency) {
+  //       onCurrencySelection(Field.OUTPUT, outputCurrency)
+  //     }
+  //   }
+  //   if (!currencies[Field.OUTPUT] && chainId && library) {
+  //     loadCurrency()
+  //   }
+  // }, [chainId, currencies, library, onCurrencySelection, params?.tokenAddress])
 
   const handleInputSelect = useCallback(
     (inputCurrency) => {
@@ -222,8 +221,6 @@ export default function SwapPage() {
     return null;
   }
 
-  console.log('allowedSlippage', allowedSlippage)
-
   return (
     <div
       className={classNames(styles.wrapper, "flex justify-center mx-auto")}
@@ -232,10 +229,7 @@ export default function SwapPage() {
       <div className="w-full max-w-md">
         <div className="rounded px-8 pt-6 pb-8 mb-4">
           <div className="mb-4">
-            <SlippageInput 
-              allowedSlippage={allowedSlippage}
-              setAllowedSlippage={setAllowedSlippage}
-            />
+            <SlippageInput />
           </div>
           <div className="mb-4">
             <CurrencyInput
@@ -283,7 +277,9 @@ export default function SwapPage() {
               : showApproveFlow 
                 ? <div className="flex">
                     <Button
-                      className={approval === ApprovalState.APPROVED ? "success" : "primary"}
+                      className={
+                        `flex-1 mr ${approval === ApprovalState.APPROVED ? "success" : "primary"}`
+                      }
                       onClick={approveCallback}
                       loading={approval === ApprovalState.PENDING}
                       disabled={
@@ -299,7 +295,7 @@ export default function SwapPage() {
                       }
                     </Button>
                     <Button
-                      className={isValid && priceImpactSeverity > 2 ? "danger" : "primary"}
+                      className={`flex-1 ml ${isValid && priceImpactSeverity > 2 ? "danger" : "primary"}`}
                       disabled={
                         !isValid ||
                         approval !== ApprovalState.APPROVED ||
@@ -318,11 +314,7 @@ export default function SwapPage() {
                     </Button>
                   </div>
                 : <Button
-                    className={
-                      isValid && priceImpactSeverity > 2 && !swapCallbackError
-                        ? "danger"
-                        : "w-full primary"
-                    }
+                    className={`w-full ${isValid && priceImpactSeverity > 2 && !swapCallbackError ? "danger" : "primary"}`}
                     disabled={!isValid || priceImpactSeverity > 3 || !!swapCallbackError}
                     loading={attemptingTxn && !txHash}
                     onClick={handleSwap}

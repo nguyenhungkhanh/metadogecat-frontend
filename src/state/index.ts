@@ -9,7 +9,7 @@ import transactionsReducer from './transactions/reducer'
 import listsReducer from './lists/reducer'
 import swapReducer from './swap/reducer'
 
-const PERSISTED_KEYS: string[] = ['lists']
+const PERSISTED_KEYS: string[] = ['user', 'lists']
 
 const store = configureStore({
   devTools: process.env.NODE_ENV !== 'production',

@@ -50,3 +50,7 @@ export function calculateGasMargin(value: BigNumber): BigNumber {
 export function getRouterContract(_: number, library: Web3Provider, account?: string): Contract {
   return getContract(ROUTER_ADDRESS, IUniswapV2Router02ABI, library, account)
 }
+
+export function escapeRegExp(string: string): string {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') // $& means the whole matched string
+}
