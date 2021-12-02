@@ -8,6 +8,8 @@
       }
       button {
         transition: 0.15s linear;
+        color: var(--successColor);
+        border: none !important;
         &:active {
           transform: translateY(1px);
         }

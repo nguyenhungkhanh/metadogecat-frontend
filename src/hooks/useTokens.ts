@@ -5,7 +5,13 @@ import useUserAddedTokens from "state/user/hooks/useUserAddedTokens";
 import { TokenAddressMap, useUnsupportedTokenList, useCombinedActiveList, useCombinedInactiveList } from "state/lists/hooks";
 import useActiveWeb3React from "hooks/useActiveWeb3React";
 import { isAddress } from 'utils'
-import { useTokenContract } from 'hooks/useContract'
+import { useBytes32TokenContract, useTokenContract } from 'hooks/useContract'
+import { NEVER_RELOAD, useSingleCallResult } from "state/multicall/hooks";
+import getTokenInfo from "utils/getTokenInfo";
+import { useDispatch } from "react-redux";
+import { addSerializedToken } from "state/user/actions";
+import { useAddUserToken } from "state/user/hooks";
+import { serializeToken } from "state/user/hooks/helpers";
 
 // reduce token map into standard address <-> Token mapping, optionally include user added tokens
 function useTokensFromMap(
@@ -67,35 +73,21 @@ export function useAllTokens(): { [address: string]: Token } {
   }
 }
 
-// undefined if invalid or does not exist
-// null if loading
-// otherwise returns the token
 export function useToken(tokenAddress?: string): Token | undefined | null {
-  console.log(tokenAddress)
-  const { chainId } = useActiveWeb3React()
-  const [token, setToken] = useState<Token | undefined | null>(null)
+  const { library, chainId } = useActiveWeb3React()
+  const [token, setToken] = useState<Token | undefined | null>(undefined)
 
   const address = isAddress(tokenAddress)
-  const tokenContract = useTokenContract(address || undefined, false)
 
   useEffect(() => {
-    async function getTokenInfo() {
-      const name = await tokenContract.name()
-      const decimals = await tokenContract.decimals()
-      const symbol = await tokenContract.symbol()
-
-      setToken(new Token(chainId, address, decimals, symbol, name))
+    async function handleGetTokenInfo() {
+      const _token = await getTokenInfo(library, chainId, address)
+      setToken(_token)
     }
-    if (!token) {
-      if (!address || !tokenContract) {
-        setToken(undefined)
-      } else {
-        getTokenInfo()
-      }
-    }
-  }, [address, chainId, token, tokenContract])
+    handleGetTokenInfo()
+  }, [chainId, library, address])
   
-  return token;
+  return token
 }
 
 export function useCurrency(currencyId: string | undefined): Currency | null | undefined {

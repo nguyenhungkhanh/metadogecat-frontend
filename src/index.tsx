@@ -3,9 +3,9 @@ import ReactDOM from 'react-dom';
 import App from 'components/App';
 import reportWebVitals from './reportWebVitals';
 import Providers from 'Providers';
-import ListsUpdater from 'state/lists/updater'
 import TransactionUpdater from './state/transactions/updater'
 import MulticallUpdater from 'state/multicall/updater'
+
 import './styles/index.scss';
 import './animation.scss'
 import './index.scss'
@@ -13,7 +13,6 @@ import './index.scss'
 function Updaters() {
   return (
     <>
-      <ListsUpdater />
       <TransactionUpdater />
       <MulticallUpdater />
     </>

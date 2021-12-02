@@ -227,7 +227,6 @@ export function useSingleCallResult(
   }, [result, contract, fragment, currentBlock])
 }
 
-
 export function useSingleContractMultipleData(
   contract: Contract | null | undefined,
   methodName: string,

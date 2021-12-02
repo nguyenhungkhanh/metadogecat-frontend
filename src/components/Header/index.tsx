@@ -7,8 +7,9 @@ import logoImage from "assets/images/logo.png";
 import ModalWalletConnect from 'components/ModalWalletConnect';
 import styles from './index.module.scss';
 import useModal from 'hooks/useModal';
-
-let timeout: any;
+import { Token } from '@pancakeswap/sdk';
+import { isAddress } from 'ethers/lib/utils';
+import getTokenInfo from 'utils/getTokenInfo';
 
 const formattedAccount = (account: string) => {
   return account?.slice(0, 2) + "..." + account?.slice(-4)
@@ -16,17 +17,35 @@ const formattedAccount = (account: string) => {
 
 function Header() {
   const history = useHistory()
-  const { account } = useActiveWeb3React()
-  const params: any = useParams()
+  const { account, library, chainId } = useActiveWeb3React()
 
   const [search, setSearch] = useState("")
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<any>(null)
+  const [token, setToken] = useState<Token | undefined>(undefined)
   const [isOpen, setIsOpen] = useState(false)
 
   const handleOnChange = (event: any) => {
     setSearch(event?.target?.value)
   }
+
+  const handleGetTokenInfo = useCallback(async (tokenAddress) => {
+    setLoading(true)
+    try {
+      const _token = await getTokenInfo(library, chainId, tokenAddress)
+      setToken(_token)
+    } catch(error) {
+      console.error(error)
+    }
+    setLoading(false)
+  }, [chainId, library])
+
+  useEffect(() => {
+    if (isAddress(search)) {
+      handleGetTokenInfo(search)
+    } else {
+      setToken(undefined)
+    }
+  }, [handleGetTokenInfo, search])
 
   const [onPresentModal] = useModal(
     <ModalWalletConnect />,
@@ -68,12 +87,14 @@ function Header() {
             </div>
             <div className="search-results">
               {
-                result
+                token
                 ? <div className="result-item" onClick={() => {}}>
-                    <span className="result-item__name">{ result.name } ({ result.symbol })</span> <br />
-                    <small>{ result.address }</small>
+                    <span className="result-item__name">{ token.name } ({ token.symbol })</span> <br />
+                    <small>{ token.address }</small>
                   </div>
-                : null
+                : <div className="result-item">
+                    { loading ? 'Loading...' : 'No option' }
+                  </div>
               }
             </div>
           </div>

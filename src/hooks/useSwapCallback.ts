@@ -122,10 +122,7 @@ export function useSwapCallback(
         const estimatedCalls: EstimatedSwapCall[] = await Promise.all(
           swapCalls.map((call) => {
             const { parameters: { methodName, args, value }, contract } = call
-
             const options = !value || isZero(value) ? {} : { value }
-
-            console.log('methodName', methodName, args, options)
 
             return contract.estimateGas[methodName](...args, options)
               .then((gasEstimate) => {
@@ -133,15 +130,7 @@ export function useSwapCallback(
                 return { call, gasEstimate }
               })
               .catch(async (gasError) => {
-                console.log('gasError', gasError, allowedSlippage)
                 console.error('Gas estimate failed, trying eth_call to extract error', call)
-
-                console.log('contract', contract, methodName, ...args, options)
-
-                const response = await contract.callStatic[methodName](...args, options)
-
-                console.log('response', response)
-
                 return contract.callStatic[methodName](...args, options)
                   .then((result) => {
                     console.error('Unexpected successful call after failed estimate gas', call, gasError, result)
