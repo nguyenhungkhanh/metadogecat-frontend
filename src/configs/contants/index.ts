@@ -12,15 +12,12 @@ type ChainTokenList = {
 export const BASES_TO_CHECK_TRADES_AGAINST: ChainTokenList = {
   [ChainId.MAINNET]: [
     mainnetTokens.wbnb,
-    mainnetTokens.cake,
     mainnetTokens.busd,
     mainnetTokens.usdt,
     mainnetTokens.btcb,
-    mainnetTokens.ust,
     mainnetTokens.eth,
-    mainnetTokens.usdc,
   ],
-  [ChainId.TESTNET]: [testnetTokens.wbnb, testnetTokens.cake, testnetTokens.busd],
+  [ChainId.TESTNET]: [testnetTokens.wbnb, testnetTokens.busd],
 }
 
 export const ZERO_PERCENT = new Percent('0')

@@ -5,7 +5,6 @@ import userReducer from './user/reducer'
 import blockReducer from './block/reducer'
 import multicallReducer from './multicall/reducer'
 import transactionsReducer from './transactions/reducer'
-import listsReducer from './lists/reducer'
 import swapReducer from './swap/reducer'
 
 const PERSISTED_KEYS: string[] = ['user', 'lists']
@@ -19,7 +18,6 @@ const store = configureStore({
     multicall: multicallReducer,
     transactions: transactionsReducer,
     user: userReducer,
-    lists: listsReducer,
     swap: swapReducer,
   },
   middleware: [...getDefaultMiddleware({ thunk: true }), save({ states: PERSISTED_KEYS })],

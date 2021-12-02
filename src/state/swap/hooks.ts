@@ -92,7 +92,6 @@ export function useDerivedSwapInfo(): {
 
   const inputCurrency = useCurrency(inputCurrencyId);
   const outputCurrency = useCurrency(outputCurrencyId);
-  console.log('outputCurrency', outputCurrencyId, outputCurrency)
   const recipientLookup = useENS(recipient ?? undefined);
   const to: string | null =
     (recipient === null ? account : recipientLookup.address) ?? null;
@@ -292,7 +291,6 @@ export function useSwapActionHandlers(): {
   const dispatch = useDispatch<AppDispatch>()
   const onCurrencySelection = useCallback(
     (field: Field, currency: Currency) => {
-      console.log('onCurrencySelection', currency)
       dispatch(
         selectCurrency({
           field,
@@ -334,8 +332,6 @@ export function useLoadCurrency() {
   const { chainId } = useActiveWeb3React()
   const params: any = useParams()
   const dispatch = useDispatch<AppDispatch>()
-
-  console.log('params?.tokenAddress', params?.tokenAddress)
 
   useEffect(() => {
     if (!chainId) return

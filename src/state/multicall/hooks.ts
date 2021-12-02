@@ -195,10 +195,6 @@ export function useMultipleContractSingleData(
   }, [fragment, results, contractInterface, currentBlock])
 }
 
-// use this options object
-export const NEVER_RELOAD: ListenerOptions = {
-  blocksPerFetch: Infinity,
-}
 
 export function useSingleCallResult(
   contract: Contract | null | undefined,
