@@ -52,8 +52,6 @@ function useSwapCallArguments(
   const recipient = recipientAddressOrName === null ? account : recipientAddress
   const deadline = useTransactionDeadline()
 
-  console.log('deadline', deadline)
-
   return useMemo(() => {
     if (!trade || !recipient || !library || !account || !chainId || !deadline) return []
 

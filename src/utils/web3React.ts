@@ -1,14 +1,6 @@
 // @ts-nocheck
-import { UnsupportedChainIdError } from "@web3-react/core";
-import {
-  InjectedConnector,
-  NoEthereumProviderError,
-  UserRejectedRequestError as UserRejectedRequestErrorInjected,
-} from "@web3-react/injected-connector";
-import {
-  WalletConnectConnector,
-  UserRejectedRequestError as UserRejectedRequestErrorWalletConnect,
-} from "@web3-react/walletconnect-connector";
+import { InjectedConnector } from "@web3-react/injected-connector";
+import { WalletConnectConnector } from "@web3-react/walletconnect-connector";
 import { BscConnector } from "@binance-chain/bsc-connector";
 import { ethers } from "ethers";
 import { CHAIN_ID } from "configs";
@@ -45,22 +37,4 @@ export const getLibrary = (provider: any): ethers.providers.Web3Provider => {
   const library = new ethers.providers.Web3Provider(provider);
   library.pollingInterval = POLLING_INTERVAL;
   return library;
-};
-
-export const getErrorMessage = (error: Error | null) => {
-  if (!error) return null;
-
-  if (error instanceof NoEthereumProviderError) {
-    return "No Ethereum browser extension detected, install MetaMask on desktop or visit from a dApp browser on mobile.";
-  } else if (error instanceof UnsupportedChainIdError) {
-    return "You're connected to an unsupported network.";
-  } else if (
-    error instanceof UserRejectedRequestErrorInjected ||
-    error instanceof UserRejectedRequestErrorWalletConnect
-  ) {
-    return "Please authorize this website to access your Ethereum account.";
-  } else {
-    console.error(error);
-    return "An unknown error occurred. Check the console for more details.";
-  }
 };

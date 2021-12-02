@@ -1,7 +1,11 @@
 // @ts-nocheck
 import { ChainId } from '@pancakeswap/sdk'
 import addresses from 'configs/contants/contracts'
-import { Address } from 'configs/contants/types'
+
+export interface Address {
+  97?: string
+  56: string
+}
 
 export const getAddress = (address: Address): string => {
   const chainId = process.env.REACT_APP_CHAIN_ID

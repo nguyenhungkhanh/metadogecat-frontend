@@ -1,25 +1,19 @@
 import { createReducer } from '@reduxjs/toolkit'
-import { DEFAULT_DEADLINE_FROM_NOW, INITIAL_ALLOWED_SLIPPAGE } from 'configs/contants'
-import { SerializedToken } from 'configs/contants/types'
+import { DEFAULT_DEADLINE_FROM_NOW, GAS_PRICE_GWEI, INITIAL_ALLOWED_SLIPPAGE } from 'configs/contants'
 import {
   addSerializedToken,
+  SerializedToken,
   updateUserSingleHopOnly,
   updateUserSlippageTolerance,
 } from './actions'
-import { GAS_PRICE_GWEI } from './hooks/helpers'
 
 export interface UserState {
   // only allow swaps on direct pairs
   userSingleHopOnly: boolean,
-
   userSlippageTolerance: number,
-
   gasPrice: string,
-
   timestamp: number,
-
   userDeadline: number,
-
   tokens: {
     [chainId: number]: {
       [address: string]: SerializedToken

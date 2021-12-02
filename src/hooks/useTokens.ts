@@ -1,57 +1,73 @@
 // @ts-nocheck
 import { useEffect, useMemo, useState } from "react";
 import { Token, Currency, ETHER } from "@pancakeswap/sdk";
-import useUserAddedTokens from "state/user/hooks/useUserAddedTokens";
 import useActiveWeb3React from "hooks/useActiveWeb3React";
 import { isAddress } from 'utils'
-import { useBytes32TokenContract, useTokenContract } from 'hooks/useContract'
-import { useSingleCallResult } from "state/multicall/hooks";
 import getTokenInfo from "utils/getTokenInfo";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addSerializedToken } from "state/user/actions";
-import { useAddUserToken } from "state/user/hooks";
-import { serializeToken } from "state/user/hooks/helpers";
 
-export function useAllTokens(): { [address: string]: Token } {
-  const { chainId } = useActiveWeb3React()
+export function serializeToken(token: Token): SerializedToken {
   return {
-    "0x55d398326f99059fF775485246999027B3197955": new Token(
-      chainId,
-      "0x55d398326f99059fF775485246999027B3197955",
-      18,
-      "USDT",
-      "Tether USD"
-    )
+    chainId: token.chainId,
+    address: token.address,
+    decimals: token.decimals,
+    symbol: token.symbol,
+    name: token.name,
+    projectLink: token.projectLink,
   }
 }
 
+export function deserializeToken(serializedToken: SerializedToken): Token {
+  return new Token(
+    serializedToken.chainId,
+    serializedToken.address,
+    serializedToken.decimals,
+    serializedToken.symbol,
+    serializedToken.name,
+    serializedToken.projectLink,
+  )
+}
+
+export function useAllTokens(): { [address: string]: Token } {
+  const { chainId } = useActiveWeb3React()
+
+  const userTokens = useSelector<AppState, AppState['user']['tokens']>((state) => state.user.tokens)
+
+  return userTokens[chainId] || {}
+}
+
 export function useToken(tokenAddress?: string): Token | undefined | null {
+  const dispatch = useDispatch()
   const { library, chainId } = useActiveWeb3React()
+  const tokens = useAllTokens()
   const [token, setToken] = useState<Token | undefined | null>(undefined)
-
   const address = isAddress(tokenAddress)
-
+  
   useEffect(() => {
     async function handleGetTokenInfo() {
       const _token = await getTokenInfo(library, chainId, address)
+      if (_token) {
+        dispatch(addSerializedToken({ serializedToken: serializeToken(_token) }))
+      }
       setToken(_token)
     }
-    handleGetTokenInfo()
-  }, [chainId, library, address])
+    if (!tokens[address]) {
+      handleGetTokenInfo()
+    }
+  }, [chainId, library, address, tokens, dispatch])
   
-  return token
+  return useMemo(() => {
+    if (tokens[address]) {
+      return deserializeToken(tokens[address])
+    }
+  
+    return token
+  }, [address, token, tokens])
 }
 
 export function useCurrency(currencyId: string | undefined): Currency | null | undefined {
   const isBNB = currencyId?.toUpperCase() === 'BNB'
   const token = useToken(isBNB ? undefined : currencyId)
   return isBNB ? ETHER : token
-}
-
-export function useUnsupportedTokens(): { [address: string]: Token } {
-  return {};
-}
-
-export function useAllInactiveTokens(): { [address: string]: Token } {
-  return {}
 }

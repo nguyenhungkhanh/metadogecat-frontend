@@ -6,6 +6,7 @@ import { tryParseAmount } from 'state/swap/hooks'
 import { useCurrencyBalance } from 'state/wallet/hooks'
 import { useWETHContract } from './useContract'
 import { useCallWithGasPrice } from './useCallWithGasPrice'
+import { addTransaction } from 'state/transactions/actions'
 
 export enum WrapType {
   NOT_APPLICABLE,
@@ -48,7 +49,7 @@ export default function useWrapCallback(
                   const txReceipt = await callWithGasPrice(wethContract, 'deposit', undefined, {
                     value: `0x${inputAmount.raw.toString(16)}`,
                   })
-                  // addTransaction(txReceipt, { summary: `Wrap ${inputAmount.toSignificant(6)} BNB to WBNB` })
+                  addTransaction(txReceipt, { summary: `Wrap ${inputAmount.toSignificant(6)} BNB to WBNB` })
                 } catch (error) {
                   console.error('Could not deposit', error)
                 }

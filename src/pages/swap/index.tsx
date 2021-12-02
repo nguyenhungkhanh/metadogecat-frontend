@@ -1,68 +1,44 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { isAddress } from "ethers/lib/utils";
+import { CurrencyAmount, JSBI, Trade } from "@pancakeswap/sdk";
+import classNames from "classnames";
 import { ExchangeIcon } from "components/icons"
 import {
   useSwapState,
-  useDefaultsFromURLSearch,
   useDerivedSwapInfo,
   useSwapActionHandlers,
   useLoadCurrency,
 } from "state/swap/hooks";
-import { CurrencyAmount, JSBI, Token, Trade } from "@pancakeswap/sdk";
-import { useCurrency } from "hooks/useTokens";
 import useWrapCallback, { WrapType } from "hooks/useWrapCallback";
 import { Field } from "state/swap/actions";
-import {
-  useUserSingleHopOnly,
-  useUserSlippageTolerance,
-} from "state/user/hooks";
-import SwapFooter from "./components/SwapFooter";
-import TradePrice from "./components/TradePrice";
-import CurrencyInput from "./components/CurrencyInput";
+import { useUserSingleHopOnly, useUserSlippageTolerance } from "state/user/hooks";
 import maxAmountSpend from "utils/maxAmountSpend";
-import {
-  ApprovalState,
-  useApproveCallbackFromTrade,
-} from "hooks/useApproveCallback";
-import useActiveWeb3React from "hooks/useActiveWeb3React";
+import { ApprovalState, useApproveCallbackFromTrade } from "hooks/useApproveCallback";
 import { computeTradePriceBreakdown, warningSeverity } from "utils/prices";
 import { useSwapCallback } from "hooks/useSwapCallback";
-import { isAddress } from "ethers/lib/utils";
-import getTokenInfo from "utils/getTokenInfo";
-import classNames from "classnames";
 
-import styles from "./index.module.scss";
+import SwapFooter from "./components/SwapFooter";
+import CurrencyInput from "./components/CurrencyInput";
+import SlippageInput from './components/SlippageInput'
 import SwapRoute from "./components/SwapRoute";
 import { Button } from "components/Elements";
-import SlippageInput from './components/SlippageInput'
+
+import styles from "./index.module.scss";
 
 export default function SwapPage() {
   useLoadCurrency();
   const params: any = useParams();
-  const { chainId, library } = useActiveWeb3React();
-
   const [allowedSlippage] = useUserSlippageTolerance();
   const [singleHopOnly] = useUserSingleHopOnly();
 
   // swap state
   const { independentField, typedValue, recipient } = useSwapState();
-  const {
-    v2Trade,
-    currencyBalances,
-    parsedAmount,
-    currencies,
-    inputError: swapInputError,
-  } = useDerivedSwapInfo();
-
-  console.log('currencies', currencies);
+  const { v2Trade, currencyBalances, parsedAmount, currencies, inputError: swapInputError } = useDerivedSwapInfo();
 
   const { onSwitchTokens, onCurrencySelection, onUserInput } = useSwapActionHandlers();
 
-  const {
-    wrapType,
-    execute: onWrap,
-    inputError: wrapInputError,
-  } = useWrapCallback(
+  const { wrapType, execute: onWrap, inputError: wrapInputError } = useWrapCallback(
     currencies[Field.INPUT],
     currencies[Field.OUTPUT],
     typedValue
@@ -72,17 +48,15 @@ export default function SwapPage() {
   const trade = showWrap ? undefined : v2Trade;
 
   // the callback to execute the swap
-  const { callback: swapCallback, error: swapCallbackError } = useSwapCallback(
-    trade,
-    allowedSlippage,
-    recipient
-  );
+  const { callback: swapCallback, error: swapCallbackError } = useSwapCallback(trade, allowedSlippage, recipient);
 
   // errors
   const { priceImpactWithoutFee } = computeTradePriceBreakdown(trade);
 
   // warnings on slippage
   const priceImpactSeverity = warningSeverity(priceImpactWithoutFee);
+
+  console.log('priceImpactSeverity', trade, showWrap, priceImpactSeverity)
 
   const parsedAmounts = showWrap
     ? {
@@ -107,10 +81,7 @@ export default function SwapPage() {
   const noRoute = !route;
 
   // check whether the user has approved the router on the input token
-  const [approval, approveCallback] = useApproveCallbackFromTrade(
-    trade,
-    allowedSlippage
-  );
+  const [approval, approveCallback] = useApproveCallbackFromTrade(trade, allowedSlippage);
 
   // check if user has gone through approval process, used to show two step buttons, reset on token change
   const [approvalSubmitted, setApprovalSubmitted] = useState<boolean>(false);
@@ -181,18 +152,6 @@ export default function SwapPage() {
       onUserInput(Field.INPUT, maxAmountInput.toExact());
     }
   }, [maxAmountInput, onUserInput]);
-
-  // useEffect(() => {
-  //   async function loadCurrency() {
-  //     const outputCurrency = await getTokenInfo(library, chainId, params?.tokenAddress)
-  //     if (outputCurrency) {
-  //       onCurrencySelection(Field.OUTPUT, outputCurrency)
-  //     }
-  //   }
-  //   if (!currencies[Field.OUTPUT] && chainId && library) {
-  //     loadCurrency()
-  //   }
-  // }, [chainId, currencies, library, onCurrencySelection, params?.tokenAddress])
 
   const handleInputSelect = useCallback(
     (inputCurrency) => {

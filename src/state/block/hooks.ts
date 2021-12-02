@@ -1,9 +1,8 @@
 import useIsWindowVisible from 'hooks/useIsWindowVisible'
 import { useEffect, useRef } from 'react'
 import { useSelector } from 'react-redux'
-import { useAppDispatch } from 'state'
+import { AppState, useAppDispatch } from 'state'
 import { simpleRpcProvider } from 'utils/providers'
-import { State } from '../types'
 import { setBlock } from './reducer'
 
 export const usePollBlockNumber = (refreshTime = 6000) => {
@@ -26,5 +25,5 @@ export const usePollBlockNumber = (refreshTime = 6000) => {
 }
 
 export const useBlock = () => {
-  return useSelector((state: State) => state.block)
+  return useSelector<AppState, AppState['block']>((state) => state.block)
 }

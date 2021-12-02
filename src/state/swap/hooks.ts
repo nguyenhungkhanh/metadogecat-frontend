@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
 import {
   Currency,
   CurrencyAmount,
@@ -21,7 +21,6 @@ import { useTradeExactIn, useTradeExactOut } from "hooks/useTrades";
 import { isAddress } from "utils";
 import { useUserSlippageTolerance } from "state/user/hooks";
 import { computeSlippageAdjustedAmounts } from "utils/prices";
-import useParsedQueryString from "hooks/useParsedQueryString";
 import { SwapState } from "./reducer";
 import { useParams } from "react-router";
 
@@ -101,6 +100,8 @@ export function useDerivedSwapInfo(): {
     outputCurrency ?? undefined,
   ]);
 
+  console.log(relevantTokenBalances)
+
   const isExactIn: boolean = independentField === Field.INPUT;
   const parsedAmount = tryParseAmount(
     typedValue,
@@ -115,6 +116,8 @@ export function useDerivedSwapInfo(): {
     inputCurrency ?? undefined,
     !isExactIn ? parsedAmount : undefined
   );
+
+  console.log('bestTradeExactIn, bestTradeExactOut', parsedAmount, independentField, bestTradeExactIn, bestTradeExactOut)
 
   const v2Trade = isExactIn ? bestTradeExactIn : bestTradeExactOut;
 
@@ -240,47 +243,6 @@ export function queryParametersToSwapState(parsedQs: ParsedQs): SwapState {
   };
 }
 
-// updates the swap state to use the defaults for a given network
-export function useDefaultsFromURLSearch():
-  | {
-      inputCurrencyId: string | undefined;
-      outputCurrencyId: string | undefined;
-    }
-  | undefined {
-  const { chainId } = useActiveWeb3React();
-  const dispatch = useDispatch<AppDispatch>();
-  const parsedQs = useParsedQueryString();
-  const [result, setResult] = useState<
-    | {
-        inputCurrencyId: string | undefined;
-        outputCurrencyId: string | undefined;
-      }
-    | undefined
-  >();
-
-  useEffect(() => {
-    if (!chainId) return;
-    const parsed = queryParametersToSwapState(parsedQs);
-
-    dispatch(
-      replaceSwapState({
-        typedValue: parsed.typedValue,
-        field: parsed.independentField,
-        inputCurrencyId: parsed[Field.INPUT].currencyId,
-        outputCurrencyId: parsed[Field.OUTPUT].currencyId,
-        recipient: null,
-      })
-    );
-
-    setResult({
-      inputCurrencyId: parsed[Field.INPUT].currencyId,
-      outputCurrencyId: parsed[Field.OUTPUT].currencyId,
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, chainId]);
-
-  return result;
-}
 
 export function useSwapActionHandlers(): {
   onCurrencySelection: (field: Field, currency: Currency) => void

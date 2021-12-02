@@ -5,7 +5,6 @@ import flatMap from 'lodash/flatMap'
 import { useUserSingleHopOnly } from 'state/user/hooks'
 import useActiveWeb3React from 'hooks/useActiveWeb3React'
 import { PairState, usePairs } from 'hooks/usePairs'
-import { useUnsupportedTokens } from 'hooks/useTokens'
 import { isTradeBetter } from 'utils/trades'
 import { wrappedCurrency } from 'utils/wrappedCurrency'
 import {
@@ -156,24 +155,4 @@ export function useTradeExactOut(currencyIn?: Currency, currencyAmountOut?: Curr
     }
     return null
   }, [currencyIn, currencyAmountOut, allowedPairs, singleHopOnly])
-}
-
-export function useIsTransactionUnsupported(currencyIn?: Currency, currencyOut?: Currency): boolean {
-  const unsupportedTokens: { [address: string]: Token } = useUnsupportedTokens()
-  const { chainId } = useActiveWeb3React()
-
-  const tokenIn = wrappedCurrency(currencyIn, chainId)
-  const tokenOut = wrappedCurrency(currencyOut, chainId)
-
-  // if unsupported list loaded & either token on list, mark as unsupported
-  if (unsupportedTokens) {
-    if (tokenIn && Object.keys(unsupportedTokens).includes(tokenIn.address)) {
-      return true
-    }
-    if (tokenOut && Object.keys(unsupportedTokens).includes(tokenOut.address)) {
-      return true
-    }
-  }
-
-  return false
 }

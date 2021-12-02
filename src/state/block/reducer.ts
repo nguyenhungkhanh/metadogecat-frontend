@@ -1,5 +1,9 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { BlockState } from '../types'
+
+export interface BlockState {
+  currentBlock: number
+  initialBlock: number
+}
 
 const initialState: BlockState = { currentBlock: 0, initialBlock: 0 }
 

@@ -51,7 +51,6 @@ export function getProviderOrSigner(library: Web3Provider, account?: string): We
   return account ? getSigner(library, account) : library
 }
 
-
 // account is optional
 export function getContract(address: string, ABI: any, library: Web3Provider, account?: string): Contract {
   if (!isAddress(address) || address === AddressZero) {

@@ -1,6 +1,6 @@
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import classNames from 'classnames';
-import { useHistory, useParams } from 'react-router';
+import { useHistory, } from 'react-router';
 import { SearchIcon, LoadingIcon, WalletIcon } from "components/icons";
 import useActiveWeb3React from 'hooks/useActiveWeb3React';
 import logoImage from "assets/images/logo.png";

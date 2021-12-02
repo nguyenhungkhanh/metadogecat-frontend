@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { CloseIcon, CopyIcon, LogoutIcon } from "../icons";
 import metamaskImage from "../../assets/images/metamask.svg";
 

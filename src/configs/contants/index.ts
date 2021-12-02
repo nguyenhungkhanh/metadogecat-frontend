@@ -1,4 +1,5 @@
 import { ChainId, JSBI, Percent, Token } from '@pancakeswap/sdk'
+import { parseUnits } from '@ethersproject/units'
 import { mainnetTokens, testnetTokens } from './tokens'
 
 export const ROUTER_ADDRESS = process.env.REACT_APP_ROUTER_ADDRESS
@@ -59,3 +60,17 @@ export const BLOCKED_PRICE_IMPACT_NON_EXPERT: Percent = new Percent(JSBI.BigInt(
 
 // used to ensure the user doesn't send so much BNB so they end up with <.01
 export const MIN_BNB: JSBI = JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(16)) // .01 BNB
+
+export enum GAS_PRICE {
+  default = '5',
+  fast = '6',
+  instant = '7',
+  testnet = '10',
+}
+
+export const GAS_PRICE_GWEI = {
+  default: parseUnits(GAS_PRICE.default, 'gwei').toString(),
+  fast: parseUnits(GAS_PRICE.fast, 'gwei').toString(),
+  instant: parseUnits(GAS_PRICE.instant, 'gwei').toString(),
+  testnet: parseUnits(GAS_PRICE.testnet, 'gwei').toString(),
+}

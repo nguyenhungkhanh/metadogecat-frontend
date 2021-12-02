@@ -1,4 +1,4 @@
-import { Currency, CurrencyAmount, ETHER, Token, JSBI } from "@pancakeswap/sdk"
+import { Currency, CurrencyAmount, ETHER, Token, JSBI, TokenAmount } from "@pancakeswap/sdk"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { ERC20_ABI } from 'configs/abi/erc20'
 import { getContract } from 'utils'
@@ -22,7 +22,7 @@ export function useCurrencyBalance(account?: string, currency?: Currency | undef
       const contract = await getContract(token.address, ERC20_ABI, library)
       const _balance = await contract.balanceOf(account)
       if (_balance) {
-        setBalance(CurrencyAmount.ether(JSBI.BigInt(_balance.toString())))
+        setBalance(new TokenAmount(token, JSBI.BigInt(_balance.toString())))
       }
     }
   }, [account, library])

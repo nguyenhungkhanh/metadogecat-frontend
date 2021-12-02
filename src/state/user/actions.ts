@@ -1,5 +1,13 @@
 import { createAction } from "@reduxjs/toolkit";
-import { SerializedToken } from "configs/contants/types";
+
+export interface SerializedToken {
+  chainId: number
+  address: string
+  decimals: number
+  symbol?: string
+  name?: string
+  projectLink?: string
+}
 
 export const updateUserSingleHopOnly = createAction<{
   userSingleHopOnly: boolean;
