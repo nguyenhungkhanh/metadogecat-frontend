@@ -14,7 +14,6 @@ import {
   ADDITIONAL_BASES,
 } from 'configs/contants'
 
-
 function useAllCommonPairs(currencyA?: Currency, currencyB?: Currency): Pair[] {
   const { chainId } = useActiveWeb3React()
 
@@ -96,7 +95,6 @@ const MAX_HOPS = 3
  */
 export function useTradeExactIn(currencyAmountIn?: CurrencyAmount, currencyOut?: Currency): Trade | null {
   const allowedPairs = useAllCommonPairs(currencyAmountIn?.currency, currencyOut)
-
   const [singleHopOnly] = useUserSingleHopOnly()
 
   return useMemo(() => {

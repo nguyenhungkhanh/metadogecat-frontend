@@ -1,12 +1,8 @@
 import { TokenAmount, Pair, Currency } from '@pancakeswap/sdk'
-import { useMemo } from 'react'
-import { abi as IUniswapV2PairABI } from '@uniswap/v2-core/build/IUniswapV2Pair.json'
-import { Interface } from '@ethersproject/abi'
-import { useMultipleContractSingleData } from 'state/multicall/hooks'
+import { useEffect, useMemo, useState } from 'react'
 import useActiveWeb3React from 'hooks/useActiveWeb3React'
 import { wrappedCurrency } from 'utils/wrappedCurrency'
-
-const PAIR_INTERFACE = new Interface(IUniswapV2PairABI)
+import getReverses from 'utils/getReverses'
 
 export enum PairState {
   LOADING,
@@ -16,7 +12,8 @@ export enum PairState {
 }
 
 export function usePairs(currencies: [Currency | undefined, Currency | undefined][]): [PairState, Pair | null][] {
-  const { chainId } = useActiveWeb3React()
+  const { chainId, library } = useActiveWeb3React()
+  const [results, setResults] = useState<any>([])
 
   const tokens = useMemo(
     () =>
@@ -35,18 +32,36 @@ export function usePairs(currencies: [Currency | undefined, Currency | undefined
     [tokens],
   )
 
-  const results = useMultipleContractSingleData(pairAddresses, PAIR_INTERFACE, 'getReserves')
+  useEffect(() => {
+    async function handleGetReverses() {
+      try {
+        let arrayPromise = [];
+
+        for (const pairAddresse of pairAddresses) {
+          arrayPromise.push(
+            pairAddresse
+              ? getReverses(library, pairAddresse)
+              : undefined
+          )
+        }
+  
+        const responses = await Promise.all(arrayPromise)
+        setResults(responses)
+      } catch (error) {
+
+      }
+    }
+    handleGetReverses()
+  }, [library, pairAddresses])
 
   return useMemo(() => {
     return results.map((result: any, i: any) => {
-      const { result: reserves, loading } = result
-      const tokenA = tokens[i][0]
-      const tokenB = tokens[i][1]
+      const tokenA = tokens[i] && tokens[i][0] ? tokens[i][0] : undefined
+      const tokenB = tokens[i] && tokens[i][1] ? tokens[i][1] : undefined
 
-      if (loading) return [PairState.LOADING, null]
       if (!tokenA || !tokenB || tokenA.equals(tokenB)) return [PairState.INVALID, null]
-      if (!reserves) return [PairState.NOT_EXISTS, null]
-      const { reserve0, reserve1 } = reserves
+      if (!result) return [PairState.NOT_EXISTS, null]
+      const { reserve0, reserve1 } = result
       const [token0, token1] = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA]
       return [
         PairState.EXISTS,

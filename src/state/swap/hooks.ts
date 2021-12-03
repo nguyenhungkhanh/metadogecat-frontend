@@ -1,18 +1,10 @@
 import { useCallback, useEffect } from "react";
-import {
-  Currency,
-  CurrencyAmount,
-  ETHER,
-  JSBI,
-  Token,
-  TokenAmount,
-  Trade,
-} from "@pancakeswap/sdk";
+import { useParams } from "react-router";
+import { useDispatch, useSelector } from "react-redux";
+import { Currency, CurrencyAmount, ETHER, JSBI, Token, TokenAmount, Trade } from "@pancakeswap/sdk";
 import { parseUnits } from "@ethersproject/units";
-import { ParsedQs } from "qs";
 import useActiveWeb3React from "hooks/useActiveWeb3React";
 import useENS from "hooks/ENS/useENS";
-import { useDispatch, useSelector } from "react-redux";
 import { Field, selectCurrency, replaceSwapState, switchCurrencies, typeInput, setRecipient } from "state/swap/actions";
 import { useCurrency } from "hooks/useTokens";
 import { useCurrencyBalances } from "state/wallet/hooks";
@@ -21,18 +13,19 @@ import { useTradeExactIn, useTradeExactOut } from "hooks/useTrades";
 import { isAddress } from "utils";
 import { useUserSlippageTolerance } from "state/user/hooks";
 import { computeSlippageAdjustedAmounts } from "utils/prices";
-import { SwapState } from "./reducer";
-import { useParams } from "react-router";
+
+const BAD_RECIPIENT_ADDRESSES: string[] = [
+  "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f", // v2 factory
+  "0xf164fC0Ec4E93095b804a4795bBe1e041497b92a", // v2 router 01
+  "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D", // v2 router 02
+];
 
 export function useSwapState(): AppState["swap"] {
   return useSelector<AppState, AppState["swap"]>((state) => state.swap);
 }
 
 // try to parse a user entered amount for a given token
-export function tryParseAmount(
-  value?: string,
-  currency?: Currency
-): CurrencyAmount | undefined {
+export function tryParseAmount(value?: string, currency?: Currency): CurrencyAmount | undefined {
   if (!value || !currency) {
     return undefined;
   }
@@ -50,12 +43,6 @@ export function tryParseAmount(
   // necessary for all paths to return a value
   return undefined;
 }
-
-const BAD_RECIPIENT_ADDRESSES: string[] = [
-  "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f", // v2 factory
-  "0xf164fC0Ec4E93095b804a4795bBe1e041497b92a", // v2 router 01
-  "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D", // v2 router 02
-];
 
 /**
  * Returns true if any of the pairs or tokens in a trade have the given checksummed address
@@ -92,15 +79,13 @@ export function useDerivedSwapInfo(): {
   const inputCurrency = useCurrency(inputCurrencyId);
   const outputCurrency = useCurrency(outputCurrencyId);
   const recipientLookup = useENS(recipient ?? undefined);
-  const to: string | null =
-    (recipient === null ? account : recipientLookup.address) ?? null;
+
+  const to: string | null = (recipient === null ? account : recipientLookup.address) ?? null;
 
   const relevantTokenBalances = useCurrencyBalances(account ?? undefined, [
     inputCurrency ?? undefined,
     outputCurrency ?? undefined,
   ]);
-
-  console.log(relevantTokenBalances)
 
   const isExactIn: boolean = independentField === Field.INPUT;
   const parsedAmount = tryParseAmount(
@@ -116,8 +101,6 @@ export function useDerivedSwapInfo(): {
     inputCurrency ?? undefined,
     !isExactIn ? parsedAmount : undefined
   );
-
-  console.log('bestTradeExactIn, bestTradeExactOut', parsedAmount, independentField, bestTradeExactIn, bestTradeExactOut)
 
   const v2Trade = isExactIn ? bestTradeExactIn : bestTradeExactOut;
 
@@ -180,69 +163,6 @@ export function useDerivedSwapInfo(): {
     inputError,
   };
 }
-
-function parseCurrencyFromURLParameter(urlParam: any): string {
-  if (typeof urlParam === "string") {
-    const valid = isAddress(urlParam);
-    if (valid) return valid;
-    if (urlParam.toUpperCase() === "BNB") return "BNB";
-    if (valid === false) return "BNB";
-  }
-  return "BNB" ?? "";
-}
-
-const ENS_NAME_REGEX =
-  /^[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)?$/;
-const ADDRESS_REGEX = /^0x[a-fA-F0-9]{40}$/;
-
-function validatedRecipient(recipient: any): string | null {
-  if (typeof recipient !== "string") return null;
-  const address = isAddress(recipient);
-  if (address) return address;
-  if (ENS_NAME_REGEX.test(recipient)) return recipient;
-  if (ADDRESS_REGEX.test(recipient)) return recipient;
-  return null;
-}
-
-function parseTokenAmountURLParameter(urlParam: any): string {
-  // eslint-disable-next-line no-restricted-globals
-  return typeof urlParam === "string" && !isNaN(parseFloat(urlParam))
-    ? urlParam
-    : "";
-}
-
-function parseIndependentFieldURLParameter(urlParam: any): Field {
-  return typeof urlParam === "string" && urlParam.toLowerCase() === "output"
-    ? Field.OUTPUT
-    : Field.INPUT;
-}
-
-export function queryParametersToSwapState(parsedQs: ParsedQs): SwapState {
-  let inputCurrency = parseCurrencyFromURLParameter(parsedQs.inputCurrency);
-  let outputCurrency = parseCurrencyFromURLParameter(parsedQs.outputCurrency);
-  if (inputCurrency === outputCurrency) {
-    if (typeof parsedQs.outputCurrency === "string") {
-      inputCurrency = "";
-    } else {
-      outputCurrency = "";
-    }
-  }
-
-  const recipient = validatedRecipient(parsedQs.recipient);
-
-  return {
-    [Field.INPUT]: {
-      currencyId: inputCurrency,
-    },
-    [Field.OUTPUT]: {
-      currencyId: outputCurrency,
-    },
-    typedValue: parseTokenAmountURLParameter(parsedQs.exactAmount),
-    independentField: parseIndependentFieldURLParameter(parsedQs.exactField),
-    recipient,
-  };
-}
-
 
 export function useSwapActionHandlers(): {
   onCurrencySelection: (field: Field, currency: Currency) => void

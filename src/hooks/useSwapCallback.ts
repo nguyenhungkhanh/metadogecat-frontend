@@ -1,7 +1,7 @@
+import { useMemo} from 'react'
 import { BigNumber } from '@ethersproject/bignumber'
 import { Contract } from '@ethersproject/contracts'
 import { JSBI, Percent, Router, SwapParameters, Trade, TradeType } from '@pancakeswap/sdk'
-import { useMemo } from 'react'
 import useActiveWeb3React from 'hooks/useActiveWeb3React'
 import { useGasPrice } from 'state/user/hooks'
 import truncateHash from 'utils/truncateHash'
@@ -107,6 +107,7 @@ export function useSwapCallback(
     if (!trade || !library || !account || !chainId) {
       return { state: SwapCallbackState.INVALID, callback: null, error: 'Missing dependencies' }
     }
+
     if (!recipient) {
       if (recipientAddressOrName !== null) {
         return { state: SwapCallbackState.INVALID, callback: null, error: 'Invalid recipient' }
@@ -159,13 +160,7 @@ export function useSwapCallback(
           throw new Error('Unexpected error. Please contact support: none of the calls threw an error')
         }
 
-        const {
-          call: {
-            contract,
-            parameters: { methodName, args, value },
-          },
-          gasEstimate,
-        } = successfulEstimation
+        const { call: { contract, parameters: { methodName, args, value } },  gasEstimate } = successfulEstimation
 
         return contract[methodName](...args, {
           gasLimit: calculateGasMargin(gasEstimate),
@@ -208,4 +203,85 @@ export function useSwapCallback(
       error: null,
     }
   }, [trade, library, account, chainId, recipient, recipientAddressOrName, swapCalls, addTransaction, gasPrice])
+}
+
+async function tryEstimateSlippage(
+  recipient: any,
+  slippage: any,
+  deadline: any,
+  trade: Trade | undefined,
+  contract: Contract
+) {
+  if (!trade) return null;
+
+  try {
+    const swapMethods = []
+
+    swapMethods.push(
+      Router.swapCallParameters(trade, {
+        feeOnTransfer: false,
+        allowedSlippage: new Percent(JSBI.BigInt(slippage), BIPS_BASE),
+        recipient,
+        deadline: deadline.toNumber(),
+      }),
+    )
+  
+    if (trade.tradeType === TradeType.EXACT_INPUT) {
+      swapMethods.push(
+        Router.swapCallParameters(trade, {
+          feeOnTransfer: true,
+          allowedSlippage: new Percent(JSBI.BigInt(slippage), BIPS_BASE),
+          recipient,
+          deadline: deadline.toNumber(),
+        }),
+      )
+    }
+  
+    const swapCalls = swapMethods.map((parameters) => ({ parameters, contract }))
+  
+    const estimatedCalls: EstimatedSwapCall[] = await Promise.all(
+      swapCalls.map(async (call: any) => {
+        const { parameters: { methodName, args, value }, contract } = call
+        const options = !value || isZero(value) ? {} : { value }
+  
+        const gasEstimate = await contract.estimateGas[methodName](...args, options)
+        if (gasEstimate) {
+          return { call, gasEstimate}
+        }
+        return { call, error: Error('Invalid slippage') }
+      })
+    )
+
+    return estimatedCalls.find((el, ix, list): el is SuccessfulCall => {
+      return 'gasEstimate' in el && (ix === list.length - 1 || 'gasEstimate' in list[ix + 1])
+    });
+  } catch (error) {
+    return null
+  }
+}
+
+export async function getSlippage(account: any, chainId: number | undefined, library: any, deadline: any, trade: Trade | undefined) {
+  try {
+    if (!trade || !library || !account || !chainId || !deadline) return 0
+
+    const contract: Contract | null = getRouterContract(chainId, library, account)
+  
+    if (!contract) return 0
+  
+    const STEP = 50;
+  
+    let slippage = null;
+  
+    for (let _slippage = 0; _slippage < 5000; _slippage += STEP) {
+      const result = await tryEstimateSlippage(account, _slippage, deadline, trade, contract)
+      if (result) {
+        slippage = _slippage
+        break
+      }
+    }
+  
+    return slippage  
+  } catch (error) {
+    return null
+  }
 }

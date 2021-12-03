@@ -11,7 +11,7 @@ enum SlippageError {
 
 const inputRegex = RegExp(`^\\d*(?:\\\\[.])?\\d*$`) // match escaped "." characters via in a non-capturing group
 
-export default function SlippageInput() {
+export default function SlippageInput({isAutoSlippage, setIsAutoSlippage }: { isAutoSlippage: boolean, setIsAutoSlippage: (_: boolean) => void }) {
   const [userSlippageTolerance, setUserSlippageTolerance] = useUserSlippageTolerance()
   const [slippageInput, setSlippageInput] = useState('')
 
@@ -59,6 +59,8 @@ export default function SlippageInput() {
       <div>Slippage</div>
       <div className="wrapper-input rounded-sm flex items-center">
         <input 
+          style={{ opacity: isAutoSlippage ? 0.65 : 1 }}
+          readOnly={isAutoSlippage}
           className="flex-1 py-2 px-3 w-full"
           inputMode="decimal"
           pattern="^[0-9]*[.,]?[0-9]{0,2}$"
@@ -66,11 +68,16 @@ export default function SlippageInput() {
           value={slippageInput}
           onBlur={handleOnBlur}
           onChange={handleOnChange}
+          disabled={isAutoSlippage}
         />
         <span className="pr-3 percent-symbol">%</span>
-        {/* <button className="rounded-sm px-5">
+        <button 
+          className="rounded-sm px-5" 
+          style={{ opacity: isAutoSlippage ? 0.65 : 1 }} 
+          onClick={() => setIsAutoSlippage(!isAutoSlippage)}
+        >
           Auto
-        </button> */}
+        </button>
       </div>
       {!!slippageError && (
           <span className="slippage-error mt" style={{ color: slippageError === SlippageError.InvalidInput ? 'red' : '#F3841E' }}>

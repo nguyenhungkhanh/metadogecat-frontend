@@ -16,7 +16,7 @@ import { useUserSingleHopOnly, useUserSlippageTolerance } from "state/user/hooks
 import maxAmountSpend from "utils/maxAmountSpend";
 import { ApprovalState, useApproveCallbackFromTrade } from "hooks/useApproveCallback";
 import { computeTradePriceBreakdown, warningSeverity } from "utils/prices";
-import { useSwapCallback } from "hooks/useSwapCallback";
+import { getSlippage, useSwapCallback } from "hooks/useSwapCallback";
 
 import SwapFooter from "./components/SwapFooter";
 import CurrencyInput from "./components/CurrencyInput";
@@ -25,12 +25,19 @@ import SwapRoute from "./components/SwapRoute";
 import { Button } from "components/Elements";
 
 import styles from "./index.module.scss";
+import useActiveWeb3React from "hooks/useActiveWeb3React";
+import useTransactionDeadline from "hooks/useTransactionDeadline";
 
 export default function SwapPage() {
   useLoadCurrency();
+  const { account, chainId, library } = useActiveWeb3React()
   const params: any = useParams();
-  const [allowedSlippage] = useUserSlippageTolerance();
+  const deadline = useTransactionDeadline()
+  const [allowedSlippage, setAllowedSlippage] = useUserSlippageTolerance();
   const [singleHopOnly] = useUserSingleHopOnly();
+  
+  const [loadingGetAutoSlippage, setLoadingGetAutoSlippage] = useState<boolean>(false)
+  const [isAutoSlippage, setIsAutoSlippage] = useState<boolean>(false)
 
   // swap state
   const { independentField, typedValue, recipient } = useSwapState();
@@ -55,8 +62,6 @@ export default function SwapPage() {
 
   // warnings on slippage
   const priceImpactSeverity = warningSeverity(priceImpactWithoutFee);
-
-  console.log('priceImpactSeverity', trade, showWrap, priceImpactSeverity)
 
   const parsedAmounts = showWrap
     ? {
@@ -128,10 +133,23 @@ export default function SwapPage() {
   const maxAmountInput: CurrencyAmount | undefined = maxAmountSpend(currencyBalances[Field.INPUT]);
   const atMaxAmountInput = Boolean(maxAmountInput && parsedAmounts[Field.INPUT]?.equalTo(maxAmountInput))
 
-  const handleSwap = useCallback(() => {
-    if (!swapCallback) {
-      return
+  const handleGetSlippage = useCallback(async () => {
+    setLoadingGetAutoSlippage(true)
+    const slippage = await getSlippage(account, chainId, library, deadline, trade)
+    setLoadingGetAutoSlippage(false)
+    return slippage
+  }, [account, chainId, deadline, library, trade])
+
+  const handleSwap = useCallback(async () => {
+    if (isAutoSlippage) {
+      const slippage = await handleGetSlippage()
+      if (slippage) {
+        setAllowedSlippage(slippage)
+      }
     }
+
+    if (!swapCallback) return
+
     setSwapState({ attemptingTxn: true, tradeToConfirm, swapErrorMessage: undefined, txHash: undefined })
     swapCallback()
       .then((hash) => {
@@ -145,7 +163,7 @@ export default function SwapPage() {
           txHash: undefined,
         })
       })
-  }, [swapCallback, tradeToConfirm])
+  }, [isAutoSlippage, tradeToConfirm, swapCallback, handleGetSlippage, setAllowedSlippage])
 
   const handleMaxInput = useCallback(() => {
     if (maxAmountInput) {
@@ -188,7 +206,10 @@ export default function SwapPage() {
       <div className="w-full max-w-md">
         <div className="rounded px-8 pt-6 pb-8 mb-4">
           <div className="mb-4">
-            <SlippageInput />
+            <SlippageInput 
+              isAutoSlippage={isAutoSlippage}
+              setIsAutoSlippage={setIsAutoSlippage}
+            />
           </div>
           <div className="mb-4">
             <CurrencyInput
@@ -260,7 +281,7 @@ export default function SwapPage() {
                         approval !== ApprovalState.APPROVED ||
                         priceImpactSeverity > 3
                       }
-                      loading={attemptingTxn && !txHash}
+                      loading={loadingGetAutoSlippage || (attemptingTxn && !txHash)}
                       onClick={handleSwap}
                     >
                       {
@@ -275,7 +296,7 @@ export default function SwapPage() {
                 : <Button
                     className={`w-full ${isValid && priceImpactSeverity > 2 && !swapCallbackError ? "danger" : "primary"}`}
                     disabled={!isValid || priceImpactSeverity > 3 || !!swapCallbackError}
-                    loading={attemptingTxn && !txHash}
+                    loading={loadingGetAutoSlippage || (attemptingTxn && !txHash)}
                     onClick={handleSwap}
                   >
                     {
