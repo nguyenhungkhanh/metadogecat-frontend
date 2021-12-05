@@ -57,7 +57,7 @@ function Header() {
     if (isAddress(tokenAddress)) {
       setPlaceHolder(tokenAddress)
     }
-  }, [history.location])
+  }, [history?.location?.pathname])
 
   const [onPresentModal] = useModal(<ModalWalletConnect />)
   
@@ -78,7 +78,8 @@ function Header() {
           className="wrapper-logo pointer flex align-items-center" 
           onClick={() => {
             setSearch("")
-            history.push("/")
+            setPlaceHolder("0x5566af9836828e9f4d6616b5dffa366ed0d65fe6")
+            history.push("/tokens/0x5566af9836828e9f4d6616b5dffa366ed0d65fe6")
           }}
         >
           <img className="logo-image mr" src={logoImage} alt="logo"  />
