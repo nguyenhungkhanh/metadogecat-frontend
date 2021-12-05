@@ -1,11 +1,11 @@
 // @ts-nocheck
 // Code below migrated from Exchange useContract.ts
 import { useMemo } from "react"
-import useActiveWeb3React from "./useActiveWeb3React"
+import { WETH } from '@pancakeswap/sdk'
 import { Contract } from '@ethersproject/contracts'
+import useActiveWeb3React from "hooks/useActiveWeb3React"
 import { getContract } from 'utils'
 import ERC20_ABI from 'configs/abi/erc20.json'
-import { WETH } from '@pancakeswap/sdk'
 import WETH_ABI from 'configs/abi/weth.json'
 
 // returns null on errors

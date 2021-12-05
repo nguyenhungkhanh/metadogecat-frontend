@@ -1,0 +1,41 @@
+.wrapper {
+  :global {
+    .tabs {
+      position: relative;
+      .tab-item {
+        cursor: pointer;
+        width: 80px;
+        text-align: center;
+        height: 25px;
+      }
+      .active {
+        display: block;
+        width: 80px;
+        height: 2px;
+        position: absolute;
+        bottom: 0;
+        background-color: var(--primaryTextColor);
+        transition: left 0.15s linear;
+      }
+    }
+    .token-lists {
+      max-height: 248px;
+      overflow-y: auto;
+      table {
+        tr {
+          cursor: pointer;
+          border-top: 1px solid rgba(78, 106, 146, 0.314);
+          transition: 0.15s linear;
+          height: 30px;
+          line-height: 30px;
+          &:hover {
+            background-color: #070d17;
+          }
+          td {
+            padding: 0 0.5rem;
+          }
+        }
+      }
+    }
+  }
+}

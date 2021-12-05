@@ -28,6 +28,12 @@
           input {
             width: 100%;
             padding-right: 0.5rem;
+            color: #000 !important;
+            border-radius: 3px;
+            &:focus ~ .list-results {
+              display: block;
+              z-index: 1;
+            }
           }
           .wrapper-loading-icon {
             position: absolute;
@@ -40,19 +46,15 @@
             }
           }
           .list-results {
-            opacity: 0;
-            transition: 0.15s linear;
             color: #000;
             position: absolute;
             background: #fff;
             width: 100%;
             border-radius: 3px;
-            top: calc(100% + 15px);
+            top: calc(100% + 5px);
             overflow: hidden;
-            &.is-show {
-              opacity: 1;
-              top: calc(100% + 5px);
-            }
+            display: none;
+            z-index: 0;
             .result-item {
               padding: 0.5rem;
               transition: 0.15s linear;

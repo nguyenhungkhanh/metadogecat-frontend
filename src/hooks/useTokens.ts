@@ -41,7 +41,7 @@ export function useToken(tokenAddress?: string): Token | undefined | null {
   const dispatch = useDispatch()
   const { library, chainId } = useActiveWeb3React()
   const tokens = useAllTokens()
-  const [token, setToken] = useState<Token | undefined | null>(undefined)
+  const [token, setToken] = useState<Token | undefined | null>(null)
   const address = isAddress(tokenAddress)
   
   useEffect(() => {
@@ -52,18 +52,20 @@ export function useToken(tokenAddress?: string): Token | undefined | null {
       }
       setToken(_token)
     }
-    if (!tokens[address]) {
+    if (address && !tokens[address]) {
       handleGetTokenInfo()
     }
   }, [chainId, library, address, tokens, dispatch])
   
   return useMemo(() => {
+    if (!tokenAddress) return null;
+    if (!address) return undefined;
     if (tokens[address]) {
       return deserializeToken(tokens[address])
     }
   
     return token
-  }, [address, token, tokens])
+  }, [tokenAddress, address, token, tokens])
 }
 
 export function useCurrency(currencyId: string | undefined): Currency | null | undefined {

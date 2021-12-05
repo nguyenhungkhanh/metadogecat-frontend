@@ -1,13 +1,14 @@
 import React, { useCallback, useState } from 'react'
 import { Currency, Token } from '@pancakeswap/sdk';
 import classNames from 'classnames';
-import { CloseIcon } from "../icons";
-import defaultTokens from './defaultTokens'
+import { CloseIcon } from "components/icons";
 
-import styles from './index.module.scss'
 import useDebounce from 'hooks/useDebounce';
 import { useToken } from 'hooks/useTokens';
 import { Handler } from 'contexts/ModalContext';
+
+import styles from './index.module.scss'
+import { TokenLists } from 'components/lists';
 
 export interface InjectedProps {
   onDismiss?: Handler
@@ -26,14 +27,14 @@ export default function ModalSelectCurrency({ onDismiss, onCurrencySelect }: Mod
     const input = event.target.value
     setSearchQuery(input)
   }, [])
-
-  const handleOnChange = (_token: Token) => {
-    onCurrencySelect(_token)
+  
+  const onSelect = (token: Token) => {
+    onCurrencySelect(token)
     if (onDismiss) {
       onDismiss()
     }
   }
-  
+
   return (
     <div className={styles.wrapper}>
       <div className="modal">
@@ -51,29 +52,26 @@ export default function ModalSelectCurrency({ onDismiss, onCurrencySelect }: Mod
               className="w-100" 
               onChange={handleInput} 
             />
-            <div className={classNames("list-results", { "is-show": searchQuery || searchToken})}>
-              {
-                searchToken
-                ? <div className="result-item" onClick={() => handleOnChange(searchToken)}>
-                    <span className="result-name">{ searchToken.name } ({ searchToken.symbol })</span><br />
-                    <small className="result-address">{ searchToken.address }</small>
-                  </div>
-                : <div className="result-item">
-                    <span>{ searchToken === null ? "Loading..." : "Not found"}</span>
-                  </div> 
-              }
-            </div>
+            {
+              searchQuery
+              ? <div className={classNames("list-results")}>
+                  {
+                    searchToken
+                    ? <div className="result-item" onClick={() => onSelect(searchToken)}>
+                        <span className="result-name">{ searchToken.name } ({ searchToken.symbol })</span><br />
+                        <small className="result-address">{ searchToken.address }</small>
+                      </div>
+                    : <div className="result-item">
+                        <span>{ searchToken === null ? "Loading..." : "Not found"}</span>
+                      </div> 
+                  }
+                </div>
+              : null
+            }
+            
           </div>
           <div className="list-tokens mt-1">
-            <div className="list-tokens__header">Token</div>
-            {
-              defaultTokens.map((t: any) => (
-                <div key={t.address} className="token-item" onClick={() => handleOnChange(t)}>
-                  <img className="token-item__logo mr" src={t.logo} alt="" />
-                  <span className="token-item__name">{ t.symbol }</span>
-                </div>
-              ))
-            }
+            <TokenLists onSelect={onSelect} />
           </div>
         </div>
       </div>

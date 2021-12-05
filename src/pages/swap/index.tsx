@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useHistory } from "react-router-dom";
 import { isAddress } from "ethers/lib/utils";
 import { CurrencyAmount, JSBI, Trade } from "@pancakeswap/sdk";
 import classNames from "classnames";
@@ -22,7 +22,7 @@ import SwapFooter from "./components/SwapFooter";
 import CurrencyInput from "./components/CurrencyInput";
 import SlippageInput from './components/SlippageInput'
 import SwapRoute from "./components/SwapRoute";
-import { Button } from "components/Elements";
+import { Button } from "components/elements";
 
 import styles from "./index.module.scss";
 import useActiveWeb3React from "hooks/useActiveWeb3React";
@@ -30,8 +30,9 @@ import useTransactionDeadline from "hooks/useTransactionDeadline";
 
 export default function SwapPage() {
   useLoadCurrency();
-  const { account, chainId, library } = useActiveWeb3React()
+  const history: any = useHistory()
   const params: any = useParams();
+  const { account, chainId, library } = useActiveWeb3React()
   const deadline = useTransactionDeadline()
   const [allowedSlippage, setAllowedSlippage] = useUserSlippageTolerance();
   const [isAutoSlippage, setIsAutoSlippage] = useUserAutoSlippage();
@@ -207,7 +208,7 @@ export default function SwapPage() {
   const isValid = !swapInputError;
 
   if (!isAddress(params?.tokenAddress)) {
-    return null;
+    history.push("/tokens/0x5566af9836828e9f4d6616b5dffa366ed0d65fe6");
   }
 
   return (

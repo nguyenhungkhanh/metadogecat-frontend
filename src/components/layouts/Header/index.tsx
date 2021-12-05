@@ -1,27 +1,30 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { useHistory } from 'react-router';
 import classNames from 'classnames';
-import { useHistory, } from 'react-router';
-import { SearchIcon, LoadingIcon, WalletIcon } from "components/icons";
-import useActiveWeb3React from 'hooks/useActiveWeb3React';
-import logoImage from "assets/images/logo.png";
-import ModalWalletConnect from 'components/ModalWalletConnect';
-import styles from './index.module.scss';
-import useModal from 'hooks/useModal';
 import { Token } from '@pancakeswap/sdk';
 import { isAddress } from 'ethers/lib/utils';
+import { SearchIcon, LoadingIcon, WalletIcon } from "components/icons";
+import { ModalWalletConnect } from 'components/modals';
+import { TokenLists } from 'components/lists';
+import useActiveWeb3React from 'hooks/useActiveWeb3React';
+import useModal from 'hooks/useModal';
 import getTokenInfo from 'utils/getTokenInfo';
+
+import logoImage from "assets/images/logo.png";
+import styles from './index.module.scss';
 
 const formattedAccount = (account: string) => {
   return account?.slice(0, 2) + "..." + account?.slice(-4)
 }
 
 function Header() {
-  const history = useHistory()
+  const history: any = useHistory()
   const { account, library, chainId } = useActiveWeb3React()
 
   const [search, setSearch] = useState("")
+  const [placeHolder, setPlaceHolder] = useState("")
   const [loading, setLoading] = useState(false);
-  const [token, setToken] = useState<Token | undefined>(undefined)
+  const [token, setToken] = useState<Token | null | undefined>(null)
   const [isOpen, setIsOpen] = useState(false)
 
   const handleOnChange = (event: any) => {
@@ -43,13 +46,25 @@ function Header() {
     if (isAddress(search)) {
       handleGetTokenInfo(search)
     } else {
-      setToken(undefined)
+      setToken(search ? undefined : null)
     }
   }, [handleGetTokenInfo, search])
 
-  const [onPresentModal] = useModal(
-    <ModalWalletConnect />,
-  )
+  useEffect(() => {
+    const path = history?.location?.pathname || ""
+    const tokenAddress = path.split("/tokens/")[1]
+
+    if (isAddress(tokenAddress)) {
+      setPlaceHolder(tokenAddress)
+    }
+  }, [history.location])
+
+  const [onPresentModal] = useModal(<ModalWalletConnect />)
+  
+  const onSelect = (token: Token) => {
+    setIsOpen(false)
+    history.push(`/tokens/${token.address}`)
+  }
 
   return (
     <div className={styles.wrapper}>
@@ -74,7 +89,7 @@ function Header() {
             <input 
               autoComplete="nope" 
               value={search} 
-              placeholder="Enter a token address" 
+              placeholder={placeHolder || "Enter a token address" }
               onChange={handleOnChange}
               onFocus={() => setIsOpen(true)}
             />
@@ -87,14 +102,18 @@ function Header() {
             </div>
             <div className="search-results">
               {
-                token
-                ? <div className="result-item" onClick={() => {}}>
-                    <span className="result-item__name">{ token.name } ({ token.symbol })</span> <br />
-                    <small>{ token.address }</small>
-                  </div>
-                : <div className="result-item">
-                    { loading ? 'Loading...' : 'No option' }
-                  </div>
+                token === null
+                ? <TokenLists onSelect={onSelect} />
+                : (
+                    token
+                    ? <div className="result-item" onClick={() => onSelect(token)}>
+                        <span className="result-item__name">{ token.name } ({ token.symbol })</span> <br />
+                        <small>{ token.address }</small>
+                      </div>
+                    : <div className="result-item">
+                        { loading ? 'Loading...' : 'No option' }
+                      </div> 
+                  ) 
               }
             </div>
           </div>

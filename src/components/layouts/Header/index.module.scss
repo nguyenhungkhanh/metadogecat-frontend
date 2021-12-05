@@ -80,10 +80,7 @@
             border: 1px solid rgba(78, 106, 146, 0.314);
             border-radius: 3px;
             transition: 0.15s linear;
-            padding-right: calc(1rem + 22px );
-            &::placeholder {
-              color: #c6d3e7;
-            }
+            padding-right: calc(1rem + 22px);
             &:hover, &:focus {
               border-color: rgba(49, 61, 80, 1);
             }

@@ -1,12 +1,12 @@
 import React from 'react'
-import { CloseIcon, CopyIcon, LogoutIcon } from "../icons";
-import metamaskImage from "../../assets/images/metamask.svg";
+import { CloseIcon, CopyIcon, LogoutIcon } from "components/icons";
 
 import useActiveWeb3React from 'hooks/useActiveWeb3React';
 import { Handler } from 'contexts/ModalContext';
 import { ConnectorNames } from 'utils/web3React';
 import useAuth from 'hooks/useAuth';
 
+import metamaskImage from "assets/images/metamask.svg";
 import styles from './index.module.scss'
 
 export interface InjectedProps {

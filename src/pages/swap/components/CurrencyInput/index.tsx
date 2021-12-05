@@ -2,7 +2,7 @@ import React from "react";
 import { Currency } from "@pancakeswap/sdk";
 import useActiveWeb3React from "hooks/useActiveWeb3React";
 import { useCurrencyBalance } from "state/wallet/hooks";
-import ModalSelectCurrency from 'components/ModalSelectCurrency';
+import ModalSelectCurrency from 'components/modals/ModalSelectCurrency';
 
 import useModal from "hooks/useModal";
 
