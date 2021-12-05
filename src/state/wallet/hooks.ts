@@ -1,6 +1,6 @@
 import { Currency, CurrencyAmount, ETHER, Token, JSBI, TokenAmount } from "@pancakeswap/sdk"
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { ERC20_ABI } from 'configs/abi/erc20'
+import ERC20_ABI from 'configs/abi/erc20.json'
 import { getContract } from 'utils'
 import useActiveWeb3React from "hooks/useActiveWeb3React"
 

@@ -1,6 +1,6 @@
 import { useCallback } from "react"
 import { useDispatch, useSelector } from 'react-redux'
-import { updateUserSingleHopOnly } from "state/user/actions"
+import { updateUserAutoSlippage, updateUserSingleHopOnly } from "state/user/actions"
 import { AppDispatch, AppState } from 'state'
 import { updateUserSlippageTolerance } from 'state/user/actions'
 import { GAS_PRICE_GWEI } from "configs/contants"
@@ -37,6 +37,22 @@ export function useUserSlippageTolerance(): [number, (slippage: number) => void]
   )
 
   return [userSlippageTolerance, setUserSlippageTolerance]
+}
+
+export function useUserAutoSlippage(): [boolean, (autoSlippage: boolean) => void] {
+  const dispatch = useDispatch<AppDispatch>()
+  const userAutoSlippage = useSelector<AppState, AppState['user']['userAutoSlippage']>((state) => {
+    return state.user.userAutoSlippage
+  })
+
+  const setUserAutoSlippage = useCallback(
+    (autoSlippage: boolean) => {
+      dispatch(updateUserAutoSlippage({ userAutoSlippage: autoSlippage }))
+    },
+    [dispatch],
+  )
+
+  return [userAutoSlippage, setUserAutoSlippage]
 }
 
 export function useGasPrice(): string {

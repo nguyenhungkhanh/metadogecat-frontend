@@ -1,7 +1,7 @@
 import { Web3Provider } from "@ethersproject/providers";
-import { getContract, isAddress } from "utils";
 import { abi as IUniswapV2PairABI } from '@uniswap/v2-core/build/IUniswapV2Pair.json'
 import { Interface } from '@ethersproject/abi'
+import { getContract, isAddress } from "utils";
 
 const PAIR_INTERFACE = new Interface(IUniswapV2PairABI)
 

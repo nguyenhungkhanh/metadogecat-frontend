@@ -1,7 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
 import { useWeb3React } from '@web3-react/core'
 import { Web3Provider } from '@ethersproject/providers'
-// eslint-disable-next-line import/no-unresolved
 import { Web3ReactContextInterface } from '@web3-react/core/dist/types'
 import { CHAIN_ID } from 'configs'
 import { simpleRpcProvider } from 'utils/providers'

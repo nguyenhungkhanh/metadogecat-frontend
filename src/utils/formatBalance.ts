@@ -2,7 +2,8 @@
 import BigNumber from 'bignumber.js'
 import { ethers } from 'ethers'
 import { formatUnits } from 'ethers/lib/utils'
-import { BIG_TEN } from './bigNumber'
+
+const BIG_TEN = new BigNumber(10)
 
 /**
  * Take a formatted amount, e.g. 15 BNB and convert it to full decimal value, e.g. 15000000000000000

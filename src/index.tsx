@@ -4,7 +4,6 @@ import App from 'components/App';
 import reportWebVitals from './reportWebVitals';
 import Providers from 'Providers';
 import TransactionUpdater from './state/transactions/updater'
-import MulticallUpdater from 'state/multicall/updater'
 
 import './styles/index.scss';
 import './animation.scss'
@@ -14,7 +13,6 @@ function Updaters() {
   return (
     <>
       <TransactionUpdater />
-      <MulticallUpdater />
     </>
   )
 }

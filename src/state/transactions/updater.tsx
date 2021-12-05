@@ -1,9 +1,9 @@
 import { useEffect, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import useActiveWeb3React from 'hooks/useActiveWeb3React'
-import { useBlock } from 'state/block/hooks'
 import { AppDispatch, AppState } from '../index'
 import { checkedTransaction, finalizeTransaction } from './actions'
+import useBlock from 'hooks/useBlock'
 
 export function shouldCheck(
   currentBlock: number,
@@ -35,7 +35,6 @@ export default function Updater(): null {
   const state = useSelector<AppState, AppState['transactions']>((s) => s.transactions)
 
   const transactions = useMemo(() => (chainId ? state[chainId] ?? {} : {}), [chainId, state])
-
 
   useEffect(() => {
     if (!chainId || !library || !currentBlock) return

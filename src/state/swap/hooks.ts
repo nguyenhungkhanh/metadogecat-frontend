@@ -4,8 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Currency, CurrencyAmount, ETHER, JSBI, Token, TokenAmount, Trade } from "@pancakeswap/sdk";
 import { parseUnits } from "@ethersproject/units";
 import useActiveWeb3React from "hooks/useActiveWeb3React";
-import useENS from "hooks/ENS/useENS";
-import { Field, selectCurrency, replaceSwapState, switchCurrencies, typeInput, setRecipient } from "state/swap/actions";
+import { Field, selectCurrency, replaceSwapState, switchCurrencies, typeInput } from "state/swap/actions";
 import { useCurrency } from "hooks/useTokens";
 import { useCurrencyBalances } from "state/wallet/hooks";
 import { AppDispatch, AppState } from "state";
@@ -73,14 +72,12 @@ export function useDerivedSwapInfo(): {
     typedValue,
     [Field.INPUT]: { currencyId: inputCurrencyId },
     [Field.OUTPUT]: { currencyId: outputCurrencyId },
-    recipient,
   } = useSwapState();
 
   const inputCurrency = useCurrency(inputCurrencyId);
   const outputCurrency = useCurrency(outputCurrencyId);
-  const recipientLookup = useENS(recipient ?? undefined);
 
-  const to: string | null = (recipient === null ? account : recipientLookup.address) ?? null;
+  const to: string | null = account ?? null;
 
   const relevantTokenBalances = useCurrencyBalances(account ?? undefined, [
     inputCurrency ?? undefined,
@@ -168,7 +165,6 @@ export function useSwapActionHandlers(): {
   onCurrencySelection: (field: Field, currency: Currency) => void
   onSwitchTokens: () => void
   onUserInput: (field: Field, typedValue: string) => void
-  onChangeRecipient: (recipient: string | null) => void
 } {
   const dispatch = useDispatch<AppDispatch>()
   const onCurrencySelection = useCallback(
@@ -194,18 +190,10 @@ export function useSwapActionHandlers(): {
     [dispatch],
   )
 
-  const onChangeRecipient = useCallback(
-    (recipient: string | null) => {
-      dispatch(setRecipient({ recipient }))
-    },
-    [dispatch],
-  )
-
   return {
     onSwitchTokens,
     onCurrencySelection,
     onUserInput,
-    onChangeRecipient,
   }
 }
 
@@ -224,7 +212,6 @@ export function useLoadCurrency() {
         field: Field.INPUT,
         inputCurrencyId: 'BNB',
         outputCurrencyId: params?.tokenAddress,
-        recipient: null,
       }),
     )
   }, [dispatch, chainId, params?.tokenAddress])

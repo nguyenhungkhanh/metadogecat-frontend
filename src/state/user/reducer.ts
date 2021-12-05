@@ -1,10 +1,11 @@
 import { createReducer } from '@reduxjs/toolkit'
 import { DEFAULT_DEADLINE_FROM_NOW, GAS_PRICE_GWEI, INITIAL_ALLOWED_SLIPPAGE } from 'configs/contants'
 import {
-  addSerializedToken,
   SerializedToken,
+  addSerializedToken,
   updateUserSingleHopOnly,
   updateUserSlippageTolerance,
+  updateUserAutoSlippage,
 } from './actions'
 
 export interface UserState {
@@ -12,8 +13,8 @@ export interface UserState {
   userSingleHopOnly: boolean,
   userSlippageTolerance: number,
   gasPrice: string,
-  timestamp: number,
   userDeadline: number,
+  userAutoSlippage: boolean,
   tokens: {
     [chainId: number]: {
       [address: string]: SerializedToken
@@ -25,8 +26,8 @@ export const initialState: UserState = {
   userSingleHopOnly: true,
   userSlippageTolerance: INITIAL_ALLOWED_SLIPPAGE,
   gasPrice: GAS_PRICE_GWEI.default,
-  timestamp: new Date().getTime(),
   userDeadline: DEFAULT_DEADLINE_FROM_NOW,
+  userAutoSlippage: true,
   tokens: {},
 }
 
@@ -37,7 +38,9 @@ export default createReducer(initialState, (builder) =>
     })
     .addCase(updateUserSlippageTolerance, (state, action) => {
       state.userSlippageTolerance = action.payload.userSlippageTolerance
-      state.timestamp = new Date().getTime()
+    })
+    .addCase(updateUserAutoSlippage, (state, action) => {
+      state.userAutoSlippage = action.payload.userAutoSlippage
     })
     .addCase(addSerializedToken, (state, { payload: { serializedToken } }) => {
       if (!state.tokens) {
@@ -45,6 +48,5 @@ export default createReducer(initialState, (builder) =>
       }
       state.tokens[serializedToken.chainId] = state.tokens[serializedToken.chainId] || {}
       state.tokens[serializedToken.chainId][serializedToken.address] = serializedToken
-      state.timestamp = new Date().getTime()
     })
 )

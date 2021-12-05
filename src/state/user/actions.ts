@@ -17,4 +17,8 @@ export const updateUserSlippageTolerance = createAction<{
   userSlippageTolerance: number;
 }>("user/updateUserSlippageTolerance");
 
+export const updateUserAutoSlippage = createAction<{
+  userAutoSlippage: boolean;
+}>("user/updateUserAutoSlippage");
+
 export const addSerializedToken = createAction<{ serializedToken: SerializedToken }>('user/addSerializedToken')

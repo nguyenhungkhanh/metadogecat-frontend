@@ -1,6 +1,7 @@
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { TokenAmount, Pair, Currency } from '@pancakeswap/sdk'
-import { useEffect, useMemo, useState } from 'react'
 import useActiveWeb3React from 'hooks/useActiveWeb3React'
+import useBlock from 'hooks/useBlock'
 import { wrappedCurrency } from 'utils/wrappedCurrency'
 import getReverses from 'utils/getReverses'
 
@@ -12,8 +13,10 @@ export enum PairState {
 }
 
 export function usePairs(currencies: [Currency | undefined, Currency | undefined][]): [PairState, Pair | null][] {
-  const { chainId, library } = useActiveWeb3React()
   const [results, setResults] = useState<any>([])
+
+  const { chainId, library } = useActiveWeb3React()
+  const { currentBlock } = useBlock()
 
   const tokens = useMemo(
     () =>
@@ -32,27 +35,34 @@ export function usePairs(currencies: [Currency | undefined, Currency | undefined
     [tokens],
   )
 
-  useEffect(() => {
-    async function handleGetReverses() {
-      try {
-        let arrayPromise = [];
+  const handleGetReverses = useCallback(async () => {
+    try {
+      let arrayPromise = [];
 
-        for (const pairAddresse of pairAddresses) {
-          arrayPromise.push(
-            pairAddresse
-              ? getReverses(library, pairAddresse)
-              : undefined
-          )
-        }
-  
-        const responses = await Promise.all(arrayPromise)
-        setResults(responses)
-      } catch (error) {
-
+      for (const pairAddresse of pairAddresses) {
+        arrayPromise.push(
+          pairAddresse
+            ? getReverses(library, pairAddresse)
+            : undefined
+        )
       }
+
+      const responses = await Promise.all(arrayPromise)
+      setResults(responses)
+    } catch (error) {
+      console.error(error)
     }
-    handleGetReverses()
   }, [library, pairAddresses])
+
+  useEffect(() => {
+    handleGetReverses()
+  }, [currentBlock, handleGetReverses])
+
+  useEffect(() => {
+    if (!currencies.length) {
+      setResults([])
+    }
+  }, [currencies])
 
   return useMemo(() => {
     return results.map((result: any, i: any) => {

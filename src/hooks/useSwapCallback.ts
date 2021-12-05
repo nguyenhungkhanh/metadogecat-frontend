@@ -2,15 +2,13 @@ import { useMemo} from 'react'
 import { BigNumber } from '@ethersproject/bignumber'
 import { Contract } from '@ethersproject/contracts'
 import { JSBI, Percent, Router, SwapParameters, Trade, TradeType } from '@pancakeswap/sdk'
-import useActiveWeb3React from 'hooks/useActiveWeb3React'
 import { useGasPrice } from 'state/user/hooks'
-import truncateHash from 'utils/truncateHash'
+import { useTransactionAdder } from 'state/transactions/hooks'
+import useTransactionDeadline from 'hooks/useTransactionDeadline'
+import useActiveWeb3React from 'hooks/useActiveWeb3React'
+import { calculateGasMargin, getRouterContract } from 'utils'
+import isZero from 'utils/isZero'
 import { BIPS_BASE, INITIAL_ALLOWED_SLIPPAGE } from 'configs/contants'
-import { useTransactionAdder } from '../state/transactions/hooks'
-import { calculateGasMargin, getRouterContract, isAddress } from 'utils'
-import isZero from '../utils/isZero'
-import useTransactionDeadline from './useTransactionDeadline'
-import useENS from './ENS/useENS'
 
 export enum SwapCallbackState {
   INVALID,
@@ -39,26 +37,21 @@ type EstimatedSwapCall = SuccessfulCall | FailedCall
  * Returns the swap calls that can be used to make the trade
  * @param trade trade to execute
  * @param allowedSlippage user allowed slippage
- * @param recipientAddressOrName
  */
 function useSwapCallArguments(
   trade: Trade | undefined, // trade to execute, required
   allowedSlippage: number = INITIAL_ALLOWED_SLIPPAGE, // in bips
-  recipientAddressOrName: string | null, // the ENS name or address of the recipient of the trade, or null if swap should be returned to sender
 ): SwapCall[] {
   const { account, chainId, library } = useActiveWeb3React()
 
-  const { address: recipientAddress } = useENS(recipientAddressOrName)
-  const recipient = recipientAddressOrName === null ? account : recipientAddress
   const deadline = useTransactionDeadline()
 
   return useMemo(() => {
-    if (!trade || !recipient || !library || !account || !chainId || !deadline) return []
+    if (!trade || !library || !account || !chainId || !deadline) return []
 
     const contract: Contract | null = getRouterContract(chainId, library, account)
-    if (!contract) {
-      return []
-    }
+
+    if (!contract) return []
 
     const swapMethods = []
 
@@ -66,7 +59,7 @@ function useSwapCallArguments(
       Router.swapCallParameters(trade, {
         feeOnTransfer: false,
         allowedSlippage: new Percent(JSBI.BigInt(allowedSlippage), BIPS_BASE),
-        recipient,
+        recipient: account,
         deadline: deadline.toNumber(),
       }),
     )
@@ -76,14 +69,14 @@ function useSwapCallArguments(
         Router.swapCallParameters(trade, {
           feeOnTransfer: true,
           allowedSlippage: new Percent(JSBI.BigInt(allowedSlippage), BIPS_BASE),
-          recipient,
+          recipient: account,
           deadline: deadline.toNumber(),
         }),
       )
     }
 
     return swapMethods.map((parameters) => ({ parameters, contract }))
-  }, [account, allowedSlippage, chainId, deadline, library, recipient, trade])
+  }, [account, allowedSlippage, chainId, deadline, library, trade])
 }
 
 // returns a function that will execute a swap, if the parameters are all valid
@@ -91,27 +84,20 @@ function useSwapCallArguments(
 export function useSwapCallback(
   trade: Trade | undefined, // trade to execute, required
   allowedSlippage: number = INITIAL_ALLOWED_SLIPPAGE, // in bips
-  recipientAddressOrName: string | null, // the ENS name or address of the recipient of the trade, or null if swap should be returned to sender
 ): { state: SwapCallbackState; callback: null | (() => Promise<string>); error: string | null } {
   const { account, chainId, library } = useActiveWeb3React()
   const gasPrice = useGasPrice()
 
-  const swapCalls = useSwapCallArguments(trade, allowedSlippage, recipientAddressOrName)
+  const swapCalls = useSwapCallArguments(trade, allowedSlippage)
 
   const addTransaction = useTransactionAdder()
-
-  const { address: recipientAddress } = useENS(recipientAddressOrName)
-  const recipient = recipientAddressOrName === null ? account : recipientAddress
 
   return useMemo(() => {
     if (!trade || !library || !account || !chainId) {
       return { state: SwapCallbackState.INVALID, callback: null, error: 'Missing dependencies' }
     }
 
-    if (!recipient) {
-      if (recipientAddressOrName !== null) {
-        return { state: SwapCallbackState.INVALID, callback: null, error: 'Invalid recipient' }
-      }
+    if (!account) {
       return { state: SwapCallbackState.LOADING, callback: null, error: null }
     }
 
@@ -125,7 +111,6 @@ export function useSwapCallback(
 
             return contract.estimateGas[methodName](...args, options)
               .then((gasEstimate) => {
-                console.log('gasEstimate', gasEstimate)
                 return { call, gasEstimate }
               })
               .catch(async (gasError) => {
@@ -174,14 +159,7 @@ export function useSwapCallback(
             const outputAmount = trade.outputAmount.toSignificant(3)
 
             const base = `Swap ${inputAmount} ${inputSymbol} for ${outputAmount} ${outputSymbol}`
-            const withRecipient =
-              recipient === account
-                ? base
-                : `${base} to ${
-                    recipientAddressOrName && isAddress(recipientAddressOrName)
-                      ? truncateHash(recipientAddressOrName)
-                      : recipientAddressOrName
-                  }`
+            const withRecipient = base
 
             addTransaction(response, {
               summary: withRecipient,
@@ -202,7 +180,7 @@ export function useSwapCallback(
       },
       error: null,
     }
-  }, [trade, library, account, chainId, recipient, recipientAddressOrName, swapCalls, addTransaction, gasPrice])
+  }, [trade, library, account, chainId, swapCalls, gasPrice, addTransaction])
 }
 
 async function tryEstimateSlippage(

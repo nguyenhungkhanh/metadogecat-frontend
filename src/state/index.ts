@@ -1,9 +1,7 @@
-import { configureStore, getDefaultMiddleware } from '@reduxjs/toolkit'
+import { configureStore } from '@reduxjs/toolkit'
 import { save, load } from 'redux-localstorage-simple'
 import { useDispatch } from 'react-redux'
 import userReducer from './user/reducer'
-import blockReducer from './block/reducer'
-import multicallReducer from './multicall/reducer'
 import transactionsReducer from './transactions/reducer'
 import swapReducer from './swap/reducer'
 
@@ -12,15 +10,12 @@ const PERSISTED_KEYS: string[] = ['user', 'lists']
 const store = configureStore({
   devTools: process.env.NODE_ENV !== 'production',
   reducer: {
-    block: blockReducer,
-
     // Exchange
-    multicall: multicallReducer,
     transactions: transactionsReducer,
     user: userReducer,
     swap: swapReducer,
   },
-  middleware: [...getDefaultMiddleware({ thunk: true }), save({ states: PERSISTED_KEYS })],
+  middleware: [save({ states: PERSISTED_KEYS })],
   preloadedState: load({ states: PERSISTED_KEYS }),
 })
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { escapeRegExp } from 'utils'
 import { useUserSlippageTolerance } from "state/user/hooks";
 import styles from './index.module.scss'
@@ -11,7 +11,10 @@ enum SlippageError {
 
 const inputRegex = RegExp(`^\\d*(?:\\\\[.])?\\d*$`) // match escaped "." characters via in a non-capturing group
 
-export default function SlippageInput({isAutoSlippage, setIsAutoSlippage }: { isAutoSlippage: boolean, setIsAutoSlippage: (_: boolean) => void }) {
+export default function SlippageInput(
+{ isAutoSlippage, setIsAutoSlippage, autoSlippageValue }: 
+{ isAutoSlippage: boolean, setIsAutoSlippage: (_: boolean) => void, autoSlippageValue: number | null }
+) {
   const [userSlippageTolerance, setUserSlippageTolerance] = useUserSlippageTolerance()
   const [slippageInput, setSlippageInput] = useState('')
 
@@ -29,7 +32,7 @@ export default function SlippageInput({isAutoSlippage, setIsAutoSlippage }: { is
     slippageError = undefined
   }
   
-  const parseCustomSlippage = (value: string) => {
+  const parseCustomSlippage = useCallback((value: string) => {
     if (value === '' || inputRegex.test(escapeRegExp(value))) {
       setSlippageInput(value)
 
@@ -42,7 +45,13 @@ export default function SlippageInput({isAutoSlippage, setIsAutoSlippage }: { is
         console.error(error)
       }
     }
-  }
+  }, [setUserSlippageTolerance])
+
+  useEffect(() => {
+    if (autoSlippageValue) {
+      setSlippageInput((autoSlippageValue / 100).toFixed(2))
+    }
+  }, [autoSlippageValue])
 
   const handleOnBlur = () => {
     parseCustomSlippage((userSlippageTolerance / 100).toFixed(2))

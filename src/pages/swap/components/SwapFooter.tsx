@@ -1,18 +1,17 @@
 import React, { useMemo } from "react";
-import { TradeType } from "@pancakeswap/sdk";
+import { Trade, TradeType } from "@pancakeswap/sdk";
 import { Field } from "state/swap/actions";
 import { computeSlippageAdjustedAmounts, computeTradePriceBreakdown } from "utils/prices";
 import useLastTruthy from "hooks/useLast";
 import { ONE_BIPS } from "configs/contants";
 import TradePrice from "./TradePrice";
 
-export default function SwapFooter({
-  trade,
-  allowedSlippage,
-}: {
-  trade: any;
-  allowedSlippage: any;
-}) {
+interface SwapFooterProps {
+  trade: Trade | undefined
+  allowedSlippage: number
+}
+
+export default function SwapFooter({ trade, allowedSlippage} : SwapFooterProps) {
   const lastTrade = useLastTruthy(trade);
 
   const slippageAdjustedAmounts = useMemo(
@@ -25,7 +24,7 @@ export default function SwapFooter({
     [trade]
   );
 
-  if (!lastTrade) return null;
+  if (!lastTrade || !trade) return null;
 
   return (
     <div>

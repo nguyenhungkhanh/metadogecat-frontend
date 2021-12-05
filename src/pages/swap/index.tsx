@@ -12,7 +12,7 @@ import {
 } from "state/swap/hooks";
 import useWrapCallback, { WrapType } from "hooks/useWrapCallback";
 import { Field } from "state/swap/actions";
-import { useUserSingleHopOnly, useUserSlippageTolerance } from "state/user/hooks";
+import { useUserAutoSlippage, useUserSingleHopOnly, useUserSlippageTolerance } from "state/user/hooks";
 import maxAmountSpend from "utils/maxAmountSpend";
 import { ApprovalState, useApproveCallbackFromTrade } from "hooks/useApproveCallback";
 import { computeTradePriceBreakdown, warningSeverity } from "utils/prices";
@@ -34,13 +34,14 @@ export default function SwapPage() {
   const params: any = useParams();
   const deadline = useTransactionDeadline()
   const [allowedSlippage, setAllowedSlippage] = useUserSlippageTolerance();
+  const [isAutoSlippage, setIsAutoSlippage] = useUserAutoSlippage();
   const [singleHopOnly] = useUserSingleHopOnly();
   
   const [loadingGetAutoSlippage, setLoadingGetAutoSlippage] = useState<boolean>(false)
-  const [isAutoSlippage, setIsAutoSlippage] = useState<boolean>(false)
+  const [autoSlippageValue, setAutoSlippageValue] = useState<number | null>(null);
 
   // swap state
-  const { independentField, typedValue, recipient } = useSwapState();
+  const { independentField, typedValue } = useSwapState();
   const { v2Trade, currencyBalances, parsedAmount, currencies, inputError: swapInputError } = useDerivedSwapInfo();
 
   const { onSwitchTokens, onCurrencySelection, onUserInput } = useSwapActionHandlers();
@@ -55,7 +56,7 @@ export default function SwapPage() {
   const trade = showWrap ? undefined : v2Trade;
 
   // the callback to execute the swap
-  const { callback: swapCallback, error: swapCallbackError } = useSwapCallback(trade, allowedSlippage, recipient);
+  const { callback: swapCallback, error: swapCallbackError } = useSwapCallback(trade, allowedSlippage);
 
   // errors
   const { priceImpactWithoutFee } = computeTradePriceBreakdown(trade);
@@ -80,8 +81,8 @@ export default function SwapPage() {
   const route = trade?.route;
   const userHasSpecifiedInputOutput = Boolean(
     currencies[Field.INPUT] &&
-      currencies[Field.OUTPUT] &&
-      parsedAmounts[independentField]?.greaterThan(JSBI.BigInt(0))
+    currencies[Field.OUTPUT] &&
+    parsedAmounts[independentField]?.greaterThan(JSBI.BigInt(0))
   );
   const noRoute = !route;
 
@@ -136,20 +137,16 @@ export default function SwapPage() {
   const handleGetSlippage = useCallback(async () => {
     setLoadingGetAutoSlippage(true)
     const slippage = await getSlippage(account, chainId, library, deadline, trade)
+    if (slippage) {
+      setAllowedSlippage(slippage)
+      setAutoSlippageValue(slippage)
+    }
     setLoadingGetAutoSlippage(false)
     return slippage
-  }, [account, chainId, deadline, library, trade])
-
-  const handleSwap = useCallback(async () => {
-    if (isAutoSlippage) {
-      const slippage = await handleGetSlippage()
-      if (slippage) {
-        setAllowedSlippage(slippage)
-      }
-    }
-
+  }, [account, chainId, deadline, library, trade, setAllowedSlippage])
+  
+  const handleSwap = useCallback(() => {
     if (!swapCallback) return
-
     setSwapState({ attemptingTxn: true, tradeToConfirm, swapErrorMessage: undefined, txHash: undefined })
     swapCallback()
       .then((hash) => {
@@ -163,7 +160,22 @@ export default function SwapPage() {
           txHash: undefined,
         })
       })
-  }, [isAutoSlippage, tradeToConfirm, swapCallback, handleGetSlippage, setAllowedSlippage])
+  }, [tradeToConfirm, swapCallback])
+
+  const onSwap = useCallback(() => {
+    if (isAutoSlippage) {
+      handleGetSlippage()
+    } else {
+      handleSwap()
+    }
+  }, [isAutoSlippage, handleGetSlippage, handleSwap])
+
+  useEffect(() => {
+    if (autoSlippageValue) {
+      setAutoSlippageValue(null)
+      handleSwap()
+    }
+  }, [autoSlippageValue, swapCallback, handleSwap])
 
   const handleMaxInput = useCallback(() => {
     if (maxAmountInput) {
@@ -204,11 +216,12 @@ export default function SwapPage() {
       style={{ marginTop: "calc(1rem + 60px)" }}
     >
       <div className="w-full max-w-md">
-        <div className="rounded px-8 pt-6 pb-8 mb-4">
+        <div className="rounded px-8 pt-6 pb-8">
           <div className="mb-4">
             <SlippageInput 
               isAutoSlippage={isAutoSlippage}
               setIsAutoSlippage={setIsAutoSlippage}
+              autoSlippageValue={autoSlippageValue}
             />
           </div>
           <div className="mb-4">
@@ -234,7 +247,7 @@ export default function SwapPage() {
               onCurrencySelect={handleOutputSelect}
             />
           </div>
-          <div className="mb-4">
+          <div>
             {
               showWrap 
               ? <Button disabled={Boolean(wrapInputError)} onClick={onWrap}>
@@ -282,7 +295,7 @@ export default function SwapPage() {
                         priceImpactSeverity > 3
                       }
                       loading={loadingGetAutoSlippage || (attemptingTxn && !txHash)}
-                      onClick={handleSwap}
+                      onClick={onSwap}
                     >
                       {
                         priceImpactSeverity > 3
@@ -297,7 +310,7 @@ export default function SwapPage() {
                     className={`w-full ${isValid && priceImpactSeverity > 2 && !swapCallbackError ? "danger" : "primary"}`}
                     disabled={!isValid || priceImpactSeverity > 3 || !!swapCallbackError}
                     loading={loadingGetAutoSlippage || (attemptingTxn && !txHash)}
-                    onClick={handleSwap}
+                    onClick={onSwap}
                   >
                     {
                       swapInputError || 
@@ -314,7 +327,7 @@ export default function SwapPage() {
           </div>
           {
             trade 
-            ? <div className="swap-info mb-4">
+            ? <div className="swap-info mt-4">
                 <SwapFooter trade={trade} allowedSlippage={allowedSlippage} />
                 <SwapRoute trade={trade} />
               </div>
@@ -322,7 +335,7 @@ export default function SwapPage() {
           }
           {
             swapErrorMessage
-            ? <div className="danger-text mb-4">{swapErrorMessage}</div>
+            ? <div className="text-danger mt-4">{swapErrorMessage}</div>
             : null
           }
         </div>

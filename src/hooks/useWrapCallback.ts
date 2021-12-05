@@ -1,6 +1,6 @@
 // @ts-nocheck
-import { Currency, currencyEquals, ETHER, WETH } from '@pancakeswap/sdk'
 import { useMemo } from 'react'
+import { Currency, currencyEquals, ETHER, WETH } from '@pancakeswap/sdk'
 import useActiveWeb3React from 'hooks/useActiveWeb3React'
 import { tryParseAmount } from 'state/swap/hooks'
 import { useCurrencyBalance } from 'state/wallet/hooks'

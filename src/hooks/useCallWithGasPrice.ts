@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
 import ethers, { Contract, CallOverrides } from 'ethers'
-import { useGasPrice } from 'state/user/hooks'
 import { get } from 'lodash'
+import { useGasPrice } from 'state/user/hooks'
 
 /**
  * Perform a contract call with a gas price returned from useGasPrice
