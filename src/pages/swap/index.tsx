@@ -167,6 +167,7 @@ export default function SwapPage() {
     if (isAutoSlippage) {
       handleGetSlippage()
     } else {
+      setAutoSlippageValue(null)
       handleSwap()
     }
   }, [isAutoSlippage, handleGetSlippage, handleSwap])
